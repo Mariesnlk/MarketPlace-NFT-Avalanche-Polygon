@@ -22,7 +22,6 @@ contract KPMarket is ReentrancyGuard {
         owner = payable(msg.sender);
     }
 
-
     // TODO add title, description, creator(seller) nick
     struct MarketToken {
         uint256 itemId;
