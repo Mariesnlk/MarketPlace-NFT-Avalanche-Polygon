@@ -14,10 +14,10 @@ NFT Marketplace (for minting, buying and selling NFTs live with IPFS data hostin
 
 # Developer tools
 
-OpenZeppelin - a library for secure smartcontracts
-Hardhat - a development environment to compile, deploy, test, and debug your Ethereum software (can also use Truffle)
-Ethers.js - a complete and compact library for interacting with the Ethereum Blockchain and its ecosystem (can also use Web3.js)
-Waffle - the most advanced framework for testing smart contracts (can also use Chai and Mocha)
+- OpenZeppelin - a library for secure smartcontracts
+- Hardhat - a development environment to compile, deploy, test, and debug your Ethereum software (can also use Truffle)
+- Ethers.js - a complete and compact library for interacting with the Ethereum Blockchain and its ecosystem (can also use Web3.js)
+- Waffle - the most advanced framework for testing smart contracts (can also use Chai and Mocha)
 
 
 # Run Server
