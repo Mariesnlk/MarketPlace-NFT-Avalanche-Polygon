@@ -20,10 +20,21 @@ NFT Marketplace (for minting, buying and selling NFTs live with IPFS data hostin
 - Waffle - the most advanced framework for testing smart contracts (can also use Chai and Mocha)
 
 
-# Run Server
+# Running 
 To run project you shold install this
 ```shell
 https://hardhat.org/getting-started/
+```
+
+To run tests
+```shell
+npx hardhat test
+```
+
+To deploy to local network
+```shell
+npx hardhat node
+npx hardhat run scripts/deploy.js --network localhost
 ```
 
 # Use stack
