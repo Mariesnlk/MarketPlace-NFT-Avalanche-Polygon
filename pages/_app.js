@@ -2,17 +2,10 @@ import '../styles/globals.css'
 import './app.css'
 import Link from 'next/link'
 
-// function MyApp({ Component, pageProps }) {
-//   return <Component {...pageProps} />
-// }
-
-// export default MyApp
-
 function KryptoPaintMarketplace({ Component, pageProps }) {
     return (
         <div>
-            <nav className='border-b p-6' style={{ backgroundColor: 'purple' }}>
-                <p className='text-4x1 font-bold text-white' > KryptoPaintz Marketplace </p>
+            <nav className='border-b-4 p-6' style={{ backgroundColor: 'light' }}>
                 { /* Tailwind library */}
                 <div className='flex mt-4 justify-center' >
                     <Link href='/' >
