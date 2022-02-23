@@ -39,7 +39,7 @@ npx hardhat run scripts/deploy.js --network localhost
 
 To run on localhost
 ```shell
-npx run dev
+npm run dev
 ```
 or 
 ```shell
