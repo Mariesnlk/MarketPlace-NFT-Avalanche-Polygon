@@ -7,13 +7,10 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract NFT is ERC721URIStorage {
     using Counters for Counters.Counter;
-    //counters allow to keep track of tokenIds
     Counters.Counter private _tokenIds;
 
-    //address of marketplace for NFTs to interact
-    address contractAddress;
+    address private contractAddress;
 
-    //give the NFT market the ability to transact with tokens or change ownership
     constructor(address marketplaceAddress) ERC721("KryptoPaintz", "KPAINTZ") {
         contractAddress = marketplaceAddress;
     }
