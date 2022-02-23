@@ -37,6 +37,16 @@ npx hardhat node
 npx hardhat run scripts/deploy.js --network localhost
 ```
 
+To run on localhost
+```shell
+npx run dev
+```
+or 
+```shell
+npm run build
+npm run start
+```
+
 # Use stack
 
 ```shell
