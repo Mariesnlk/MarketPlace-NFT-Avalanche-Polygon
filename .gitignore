@@ -5,6 +5,11 @@ coverage.json
 typechain
 .next/
 p-key.txt
+.env.example
+.gitattributes
+.npmignore
+
+.package-lock.json
 
 #Hardhat files
 cache
