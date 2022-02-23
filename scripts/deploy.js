@@ -19,7 +19,7 @@ async function main() {
     export const nftaddress = ${nft.address}`
 
     let data = JSON.stringify(config)
-    fs.writeFileSync('consfig.js', JSON.parse(data))
+    fs.writeFileSync('config.js', JSON.parse(data))
 }
 
 
