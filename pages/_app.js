@@ -5,7 +5,6 @@ function KryptoPaintMarketplace({ Component, pageProps }) {
     return (
         <div>
             <nav className='bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-800'>
-                { /* Tailwind library */}
                 <div className='container flex flex-wrap justify-center items-center mx-auto border-b-2 mb-4'>
                     <span class="font-semibold text-3xl tracking-tight mr-12 mt-6 ">KRYPTOPAINTZ MARETPLACE</span>
                     <Link href='/' >
