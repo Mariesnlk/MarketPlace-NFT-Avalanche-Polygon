@@ -5,11 +5,18 @@ import { ethers } from 'ethers'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import Web3Modeal from 'web3modal'
+import Web3 from 'web3'
 
 import { nftaddress, nftmarketaddress } from '../config'
 
 import NFT from '../artifacts/contracts/NFT.sol/NFT.json'
 import KPMarket from '../artifacts/contracts/KPMarket.sol/KPMarket.json'
+
+let rpcEndpoint = null
+
+if (process.env.NEXT_PUBLIC_WORKSPACE_URL) {
+  rpcEndpoint = process.env.NEXT_PUBLIC_WORKSPACE_URL
+}
 
 export default function Home() {
   const [nfts, setNFTs] = useState([])
@@ -17,10 +24,12 @@ export default function Home() {
 
   useEffect(() => {
     loadNFTs()
+    setLoadingState('loaded')
   }, [])
 
   async function loadNFTs() {
-    const provider = new ethers.providers.JsonRpcProvider()
+    // const provider = new ethers.providers.Web3Provider(web3.currentProvider)
+    const provider = new ethers.providers.JsonRpcProvider('http://localhost:3000')
     const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider)
     const marketContract = new ethers.Contract(nftmarketaddress, KPMarket.abi, provider)
     const data = await marketContract.fetchMarketTokens()
@@ -40,9 +49,9 @@ export default function Home() {
       }
       return item
     }))
+
     setNFTs(items)
     setLoadingState('loaded')
-
   }
 
   async function buyNFT(nft) {
@@ -62,8 +71,14 @@ export default function Home() {
     loadNFTs()
   }
 
-  if (loadingState === 'loaded' && nfts.length) return (
-    <h1 className='px-20 py-7 text-4x1'>No NFTs in marketplace</h1>
+  if (loadingState === 'loaded' && !nfts.length) return (
+    <div className='container flex flex-wrap justify-center items-center mx-auto '>
+      <div class="max-w-sm rounded overflow-hidden shadow-lg">
+        <div class="px-6 py-4">
+          <div class="font-bold text-xl mb-2">No NFTs in Marketplace</div>
+        </div>
+      </div>
+    </div >
   )
 
   return (
@@ -95,7 +110,8 @@ export default function Home() {
                       <div className='p-4 bg-black'>
                         <p className='text-3x-1 mb-4 font-bold text-white'>
                           {nft.price} ETH
-                          <button className='w-full bg-purple-500 text-white font-vold py-3 px-12 rounded' onClick={() => buyNFT(nft)} >
+                          <button className='w-full bg-purple-500 text-white font-vold py-3 px-12 rounded'
+                            onClick={() => buyNFT(nft)} >
                             Buy
                           </button>
                         </p>
@@ -107,49 +123,10 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-        {/* <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div> */}
       </main>
 
       <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer" className='text-xl'
-        >
+        <a className='text-xl'>
           Copyright &copy; 2022 by Mariia Synelnyk
         </a>
       </footer>
