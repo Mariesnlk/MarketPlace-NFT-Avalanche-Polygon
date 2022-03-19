@@ -11,7 +11,7 @@ interface IKPMarket {
         uint256 price,
         bool sold
     );
-    // TODO add title, description, creator(seller) nick
+    // TODO add creator(seller) nick
     struct MarketToken {
         uint256 itemId;
         address nftContract;

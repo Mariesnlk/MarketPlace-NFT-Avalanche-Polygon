@@ -5,8 +5,6 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./interfaces/IKPMarket.sol";
-//security against transactions for multiple requests
-import "hardhat/console.sol";
 
 contract KPMarket is IKPMarket, ReentrancyGuard {
     using Counters for Counters.Counter;
@@ -14,9 +12,9 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
     Counters.Counter private _tokenIds;
     Counters.Counter private _tokenSold;
 
-    address payable public owner;
-
     uint256 private listingPrice = 0.045 ether;
+
+    address payable public owner;
 
     constructor() {
         owner = payable(msg.sender);
@@ -90,9 +88,9 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
         idToMarketToken[itemId].sold = true;
         _tokenSold.increment();
 
-        // payable(owner).transfer(listingPrice);
-        (bool success, ) = payable(owner).call{value: listingPrice}("");
-        require(success, "Failed to transfer Ether");
+        payable(owner).transfer(listingPrice);
+        // (bool success, ) = payable(owner).call{value: listingPrice}("");
+        // require(success, "Failed to transfer Ether");
     }
 
     // function to fetch market items - minting, buying and selling

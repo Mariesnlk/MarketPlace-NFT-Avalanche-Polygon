@@ -1,55 +1,42 @@
-# NFT Mapketplace DApp
+# Advanced Sample Hardhat Project
 
-NFT Marketplace (for minting, buying and selling NFTs live with IPFS data hosting) onto Polygon as a layer 2.   
-- Setting up the DApp development environment
-- Create a Nextjs app using the create-next-app utility to recompose the React library
-- Compile and Deploy Smart Contracts to Blockchain with Hardhat functionality
-- Implementing industry standard NFT smart contracts for DApps with the ERC721 OpenZeppelin Contracts
-- IPFS data hosting with Infura Blockchain Suite Project Management
-- Implementing an NFT Minting form on the front end to lock in Metadata and Files for the DApp
-- Looping, iterating, and filtering through hash tables with Javascript and Solidity
-- Modern Card Design and UI with Tailwind and CSS
-- Hooking up a web3 provider to the Polygon and Ethereum network
-- Running full unit testing with Chai
+This project demonstrates an advanced Hardhat use case, integrating other tools commonly used alongside Hardhat in the ecosystem.
 
-# Developer tools
+The project comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts. It also comes with a variety of other tools, preconfigured to work with the project code.
 
-- OpenZeppelin - a library for secure smartcontracts
-- Hardhat - a development environment to compile, deploy, test, and debug your Ethereum software (can also use Truffle)
-- Ethers.js - a complete and compact library for interacting with the Ethereum Blockchain and its ecosystem (can also use Web3.js)
-- Waffle - the most advanced framework for testing smart contracts (can also use Chai and Mocha)
+Try running some of the following tasks:
 
-
-# Running 
-To run project you shold install this
 ```shell
-https://hardhat.org/getting-started/
-```
-
-To run tests
-```shell
+npx hardhat accounts
+npx hardhat compile
+npx hardhat clean
 npx hardhat test
-```
-
-To deploy to local network
-```shell
 npx hardhat node
-npx hardhat run scripts/deploy.js --network localhost
+npx hardhat help
+REPORT_GAS=true npx hardhat test
+npx hardhat coverage
+npx hardhat run scripts/deploy.js
+node scripts/deploy.js
+npx eslint '**/*.js'
+npx eslint '**/*.js' --fix
+npx prettier '**/*.{json,sol,md}' --check
+npx prettier '**/*.{json,sol,md}' --write
+npx solhint 'contracts/**/*.sol'
+npx solhint 'contracts/**/*.sol' --fix
 ```
 
-To run on localhost
-```shell
-npm run dev
-```
-or 
-```shell
-npm run build
-npm run start
-```
+# Etherscan verification
 
-# Use stack
+To try out Etherscan verification, you first need to deploy a contract to an Ethereum network that's supported by Etherscan, such as Ropsten.
+
+In this project, copy the .env.example file to a file named .env, and then edit it to fill in the details. Enter your Etherscan API key, your Ropsten node URL (eg from Alchemy), and the private key of the account which will send the deployment transaction. With a valid .env file in place, first deploy your contract:
 
 ```shell
- 1. Polygon blockchain (Polygon Mumbai)
- 2. Infura (should be created a new project on Ethereum)
+hardhat run --network ropsten scripts/deploy.js
+```
+
+Then, copy the deployment address and paste it in to replace `DEPLOYED_CONTRACT_ADDRESS` in this command:
+
+```shell
+npx hardhat verify --network ropsten DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
 ```
