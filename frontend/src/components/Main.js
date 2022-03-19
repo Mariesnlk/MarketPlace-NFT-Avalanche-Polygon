@@ -21,23 +21,13 @@ function Main() {
                     className="mt-2 mr-6 ml-6 border rounded p-4"
                   // onChange={e => updateFormInput({ ...formInput, name: e.target.value })}
                   />
-                  <input
-                    placeholder="First name"
-                    className="mt-2 mr-6 ml-6 border rounded p-4"
-                  // onChange={e => updateFormInput({ ...formInput, name: e.target.value })}
-                  />
-                  <input
-                    placeholder="Last name"
-                    className="mt-2 mr-6 ml-6 border rounded p-4"
-                  // onChange={e => updateFormInput({ ...formInput, name: e.target.value })}
-                  />
                   <textarea
                     placeholder="Bio Description"
                     className="mt-2 mr-6 ml-6 border rounded p-4"
                   // onChange={e => updateFormInput({ ...formInput, description: e.target.value })}
                   />
                   <input
-                    placeholder="Email"
+                    placeholder="Password"
                     className="mt-2 mr-6 ml-6 border rounded p-4"
                   // onChange={e => updateFormInput({ ...formInput, price: e.target.value })}
                   />
