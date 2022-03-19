@@ -3,7 +3,17 @@ const fs = require("fs");
 
 async function main() {
 
-    // get the contract to deploy
+    const Token = await ethers.getContractFactory("Token");
+    const token = await Token.deploy("Mariia Paintz Token", "MARIPAINTZ", 1000000000);
+    await token.deployed();
+    console.log("Token deployed to:", token.address);
+  
+    const Vendor = await ethers.getContractFactory("Vendor");
+    const vendor = await Vendor.deploy(token.address);
+    await vendor.deployed();
+    console.log("Vendor deployed to:", vendor.address);
+
+
     const NFTMarket = await hre.ethers.getContractFactory("KPMarket");
     const nftMarket = await NFTMarket.deploy();
     await nftMarket.deployed();

@@ -50,6 +50,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
             payable(msg.sender),
             payable(address(0)),
             price,
+            0,
             false
         );
 
