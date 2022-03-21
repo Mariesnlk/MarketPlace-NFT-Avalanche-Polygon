@@ -2,13 +2,16 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./interfaces/IVendor.sol";
 
 contract Vendor is IVendor, Ownable, ReentrancyGuard  {
+    using SafeERC20 for IERC20;
     IERC20 public immutable token;
-    uint256 public price;
+    // set default price
+    uint256 public price = 0.008 ether;
 
     constructor(address token_) {
         require(token_ != address(0), "Invalid token address");
