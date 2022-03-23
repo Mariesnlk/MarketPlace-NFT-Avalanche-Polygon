@@ -53,7 +53,7 @@ export default class Navbar extends React.Component {
                     <div className='container flex flex-wrap justify-center items-center mx-auto border-b-2'>
                         <img src={logo} className='object-cover h-55 w-55 mr-12 mt-12 ml-12 text-xl' alt="logo" />
                         <Link href='/' >
-                            <a className='mr-6 mt-6 text-2xl' >Main Marketplace </a>
+                            <a className='mr-6 mt-6 text-2xl'>Main Marketplace </a>
                         </Link>
                         <Link href='/mint-item'>
                             <a className='mr-6 mt-6 text-2xl'>Mint Paintz </a>
@@ -64,6 +64,12 @@ export default class Navbar extends React.Component {
                         <Link href='/account-dashboard' >
                             <a className='mr-6 mt-6 text-2xl'>Account Dashboard </a>
                         </Link>
+                        <Link href='/token' >
+                            <a className='mr-6 mt-6 text-2xl'>MARIPAINTZ Token</a>
+                        </Link>
+                        <button className="font-bold mt-6 mr-6 bg-blue-500 text-white rounded p-2 shadow-lg">
+                            Login
+                        </button>
                         {/* <span className='mr-6 mt-6 text-xl'>{this.state.account}</span> */}
                     </div>
                 </nav>

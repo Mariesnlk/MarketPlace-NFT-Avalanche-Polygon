@@ -1,5 +1,7 @@
 import React from 'react';
 import '../styles/App.css';
+import message from '../img/message.png'
+import { StyleSheet, Text, ImageBackground, View } from 'react-native';
 
 function Main() {
   return (
@@ -11,9 +13,15 @@ function Main() {
               <span className='font-semibold text-5xl tracking-tight mr-12 mt-12 ml-12'>KRYPTOPAINTZ MARKETPLACE </span>
               <span className='font-normal text-3xl tracking-tight mr-12 mt-12 ml-12'>place
                 to mint, buy, and sell extraordinary NFTs</span>
+              <View style={styles.container}>
+                <ImageBackground
+                  style={styles.coverImage}
+                  source={message}>
+                </ImageBackground>
+              </View>
             </div>
             <div>
-              <div className="flex justify-center mb-4">
+              <div className="flex justify-center mt-8">
                 <div className="w-1/2 flex flex-col pb-12 shadow-2xl">
                   <span className='font-normal text-3xl text-center tracking-tight mr-12  ml-12'>REGISTRATION</span>
                   <input
@@ -45,3 +53,15 @@ function Main() {
 }
 
 export default Main;
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    marginLeft: '20%'
+  },
+  coverImage: {
+    width: '70%',
+    height: 400
+  }
+});

@@ -9,7 +9,9 @@ import reportWebVitals from './reportWebVitals';
 ReactDOM.render(
   <React.StrictMode>
     <Navbar />
-    <Main />
+    <div className='container flex flex-wrap justify-center items-center mx-auto'>
+      <Main />
+    </div>
     <Footer />
   </React.StrictMode>,
   document.getElementById('root')

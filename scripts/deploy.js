@@ -13,7 +13,6 @@ async function main() {
     await vendor.deployed();
     console.log("Vendor deployed to:", vendor.address);
 
-
     const NFTMarket = await hre.ethers.getContractFactory("KPMarket");
     const nftMarket = await NFTMarket.deploy();
     await nftMarket.deployed();
