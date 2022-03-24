@@ -118,7 +118,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
 
         require(
             msg.value == price,
-            "Please submit the asking price in order to continue"
+            "KPMarket: please submit the asking price in order to continue"
         );
 
         idToMarketToken[itemId].seller.transfer(msg.value);

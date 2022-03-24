@@ -14,7 +14,7 @@ contract Vendor is IVendor, Ownable, ReentrancyGuard  {
     uint256 public price = 0.008 ether;
 
     constructor(address token_) {
-        require(token_ != address(0), "Invalid token address");
+        require(token_ != address(0), "Vendor: Invalid token address");
         token = IERC20(token_);
     }
 
@@ -90,7 +90,7 @@ contract Vendor is IVendor, Ownable, ReentrancyGuard  {
         onlyOwner
         returns (uint256 _newPrice)
     {
-        require(_price > 0, "VestingToken: price cannot be low or equal zero");
+        require(_price > 0, "Vendor: price cannot be low or equal zero");
         price = _price;
         emit SettedPrice(price);
 
