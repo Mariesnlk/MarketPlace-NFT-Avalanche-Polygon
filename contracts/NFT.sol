@@ -11,11 +11,13 @@ contract NFT is ERC721URIStorage {
 
     address private contractAddress;
 
+    event MintedToken(address indexed minter, string tokenURI, uint256 itemId);
+
     constructor(address marketplaceAddress) ERC721("KryptoPaintz", "KPAINTZ") {
         contractAddress = marketplaceAddress;
     }
 
-    function mintToken(string memory tokenURI) public returns (uint256) {
+    function mintToken(string memory tokenURI) external returns (uint256) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         //passing id and url
@@ -25,6 +27,9 @@ contract NFT is ERC721URIStorage {
         //give the marketplace the approval to transact between users
         setApprovalForAll(contractAddress, true);
         //mint token and set it for sale - return the id to do so
+
+        emit MintedToken(msg.sender, tokenURI, newItemId);
+
         return newItemId;
     }
 }

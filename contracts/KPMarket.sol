@@ -10,42 +10,57 @@ import "./interfaces/IKPMarket.sol";
 contract KPMarket is IKPMarket, ReentrancyGuard {
     using Counters for Counters.Counter;
 
-    Counters.Counter private _tokenIds;
-    Counters.Counter private _tokenSold;
+    Counters.Counter private tokenIds;
+    Counters.Counter private tokenSold;
 
-    IERC721 private immutable nftContract;
+    IERC721 private nftContract;
 
     uint256 private listingPrice = 0.045 ether;
 
     address payable private owner;
 
-    constructor(address nftContract_) {
-        require(nftContract_ != address(0), "KPMarket: Invalid nftContract address");
-        nftContract = IERC721(nftContract_);
-
+    constructor() {
         owner = payable(msg.sender);
     }
 
     // tokenId return which MarketToken - fetch which one it is
     mapping(uint256 => MarketToken) private idToMarketToken;
 
+    function setNFTContractAddress(address nftContract_) external {
+        require(
+            nftContract_ != address(0),
+            "KPMarket: invalid nftContract address"
+        );
+        nftContract = IERC721(nftContract_);
+    }
+
+    function updateListingPrice(uint256 _listingPrice) public payable {
+        require(
+            owner == msg.sender,
+            "KPMarket: only marketplace owner can update listing price."
+        );
+        listingPrice = _listingPrice;
+    }
+
     function getListingPrice() external view returns (uint256) {
         return listingPrice;
     }
 
     // function to put item up for sale
-    function makeMarketItem(
-        uint256 tokenId,
-        uint256 price
-    ) external payable override nonReentrant {
-        require(price > 0, "Price must be at least one wei");
+    function createMarketItem(uint256 tokenId, uint256 price)
+        external
+        payable
+        override
+        nonReentrant
+    {
+        require(price > 0, "KPMarket: price must be at least one wei");
         require(
             msg.value == listingPrice,
-            "Price must be equal to listening price"
+            "KPMarket: price must be equal to listening price"
         );
 
-        _tokenIds.increment();
-        uint256 itemId = _tokenIds.current();
+        tokenIds.increment();
+        uint256 itemId = tokenIds.current();
 
         //putting it up for sale
         idToMarketToken[itemId] = MarketToken(
@@ -72,6 +87,25 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
         );
     }
 
+    function resellToken(uint256 tokenId, uint256 price) external payable override {
+        require(
+            idToMarketToken[tokenId].owner == msg.sender,
+            "KPMarket: only item owner can perform this operation"
+        );
+        require(
+            msg.value == listingPrice,
+            "KPMarket: price must be equal to listing price"
+        );
+        idToMarketToken[tokenId].sold = false;
+        idToMarketToken[tokenId].price = price;
+        idToMarketToken[tokenId].seller = payable(msg.sender);
+        idToMarketToken[tokenId].owner = payable(address(this));
+
+        tokenIds.decrement();
+
+        nftContract.transferFrom(msg.sender, address(this), tokenId);
+    }
+
     // function to conduct transactions and market sales
     function createMarketSale(uint256 itemId)
         external
@@ -94,23 +128,21 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
         idToMarketToken[itemId].owner = payable(msg.sender);
         idToMarketToken[itemId].sold = true;
 
-        _tokenSold.increment();
+        tokenSold.increment();
 
         // payable(owner).transfer(listingPrice);
         (bool success, ) = payable(owner).call{value: listingPrice}("");
         require(success, "Failed to transfer Ether");
     }
 
-    // function to fetch market items - minting, buying and selling
-    //returns the number of unsold items
-    function fetchMarketTokens()
+    function getUnsoldItems()
         external
         view
         override
         returns (MarketToken[] memory)
     {
-        uint256 itemsCount = _tokenIds.current();
-        uint256 unsoldItemCount = _tokenIds.current() - _tokenSold.current();
+        uint256 itemsCount = tokenIds.current();
+        uint256 unsoldItemCount = tokenIds.current() - tokenSold.current();
         uint256 currentIndex = 0;
 
         MarketToken[] memory items = new MarketToken[](unsoldItemCount);
@@ -129,13 +161,13 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
     }
 
     // return nfts that the user has purchased
-    function fetchMyNFTs()
+    function getMyNFTs()
         external
         view
         override
         returns (MarketToken[] memory)
     {
-        uint256 totalItemCount = _tokenIds.current();
+        uint256 totalItemCount = tokenIds.current();
         //counter for each individual user
         uint256 itemCount = 0;
         uint256 currentIndex = 0;
@@ -161,13 +193,13 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
     }
 
     // function for returning an array of minting nfts(.seller)
-    function fetchItemsCreated()
+    function getOnlyCreatedItems()
         external
         view
         override
         returns (MarketToken[] memory)
     {
-        uint256 totalItemCount = _tokenIds.current();
+        uint256 totalItemCount = tokenIds.current();
         uint256 itemCount = 0;
         uint256 currentIndex = 0;
 

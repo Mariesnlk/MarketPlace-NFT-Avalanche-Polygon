@@ -23,18 +23,18 @@ interface IKPMarket {
         bool sold;
     }
 
-    function makeMarketItem(
-        uint256 tokenId,
-        uint256 price
-    ) external payable;
+    function createMarketItem(uint256 tokenId, uint256 price) external payable;
 
-    function createMarketSale(uint256 itemId)
-        external
-        payable;
+    function createMarketSale(uint256 itemId) external payable;
 
-    function fetchMarketTokens() external view returns (MarketToken[] memory);
+    function resellToken(uint256 tokenId, uint256 price) external payable;
 
-    function fetchMyNFTs() external view returns (MarketToken[] memory);
+    // fetchMarketTokens
+    function getUnsoldItems() external view returns (MarketToken[] memory);
 
-    function fetchItemsCreated() external view returns (MarketToken[] memory);
+    // fetchMyNFTs
+    function getMyNFTs() external view returns (MarketToken[] memory);
+
+    // fetchItemsCreated
+    function getOnlyCreatedItems() external view returns (MarketToken[] memory);
 }
