@@ -1,7 +1,7 @@
 import React from 'react';
 import '../styles/App.css';
 import message from '../img/message.png'
-import { StyleSheet, Text, ImageBackground, View } from 'react-native';
+import { StyleSheet, ImageBackground, View } from 'react-native';
 
 function Main() {
   return (

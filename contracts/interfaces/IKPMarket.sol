@@ -24,12 +24,11 @@ interface IKPMarket {
     }
 
     function makeMarketItem(
-        address nftContract,
         uint256 tokenId,
         uint256 price
     ) external payable;
 
-    function createMarketSale(address nftContract, uint256 itemId)
+    function createMarketSale(uint256 itemId)
         external
         payable;
 

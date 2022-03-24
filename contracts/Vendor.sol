@@ -9,7 +9,7 @@ import "./interfaces/IVendor.sol";
 
 contract Vendor is IVendor, Ownable, ReentrancyGuard  {
     using SafeERC20 for IERC20;
-    IERC20 public immutable token;
+    IERC20 private immutable token;
     // set default price
     uint256 public price = 0.008 ether;
 
@@ -35,7 +35,7 @@ contract Vendor is IVendor, Ownable, ReentrancyGuard  {
             "Vendor: contract has not enough tokens in its balance"
         );
 
-        token.transfer(msg.sender, amountToBuy);
+        token.safeTransfer(msg.sender, amountToBuy);
         emit BoughtToken(msg.sender, amountToPay, amountToBuy);
 
         if (returnAmounts != 0) {
@@ -71,7 +71,7 @@ contract Vendor is IVendor, Ownable, ReentrancyGuard  {
             "Vendor: contract has not enough funds to accept the sell request"
         );
 
-        token.transferFrom(msg.sender, address(this), _amount);
+        token.safeTransferFrom(msg.sender, address(this), _amount);
         emit SoldToken(msg.sender, _amount, amountToTransfer);
 
         (bool success, ) = msg.sender.call{value: amountToTransfer}("");
