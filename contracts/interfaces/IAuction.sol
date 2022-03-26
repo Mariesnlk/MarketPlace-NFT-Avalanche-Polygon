@@ -33,19 +33,15 @@ interface IAuction {
 
     /** @dev - Withdraw the token after the auction is over
      */
-    function withdrawToken() external returns (bool);
+    function withdrawToken() external;
 
     /** @dev - Withdraw the funds after the auction is over
      */
-    function withdrawFunds() external returns (bool);
+    function withdrawFunds() external;
 
     /** @dev - Cancel the auction
      */
     function cancelAuction() external returns (bool);
-
-    /** @dev - Get the auction state
-     */
-    function getAuctionState() external view returns (uint256);
 
     /** @dev - Returns a list of all bids and addresses
      */
@@ -53,4 +49,8 @@ interface IAuction {
         external
         view
         returns (address[] memory, uint256[] memory);
+
+    /** @dev - Get the auction state
+     */
+    function getAuctionState() external view returns (AuctionState);
 }
