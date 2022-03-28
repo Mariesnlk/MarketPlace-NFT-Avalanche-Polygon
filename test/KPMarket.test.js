@@ -33,6 +33,11 @@ describe("KPMarket", () => {
 
     describe('Intercat with marketplace', async () => {
 
+        it('Should reverted deploying with zero address', async () => {
+            await expect(market.setNFTContractAddress('0x0000000000000000000000000000000000000000'))
+                .to.be.revertedWith("KPMarket: invalid nftContract address");
+        });
+
         it('Should contracts not to be ..', async () => {
             expect(marketAddress).to.be.not.undefined;
             expect(marketAddress).to.be.not.null;
@@ -157,6 +162,70 @@ describe("KPMarket", () => {
             expect(sold).to.be.false;
 
         });
-        
+
+        it("Should get unsold items(NFT tokens)", async () => {
+            await nft.mintToken('https-p1');
+            await nft.mintToken('https-p2');
+
+            let auctionPrice = ethers.utils.parseUnits('0.02', 'ether');
+
+            await market.createMarketItem(1, auctionPrice, { value: listingPrice });
+            await market.createMarketItem(2, auctionPrice, { value: listingPrice });
+
+            let unsoldItems = await market.getUnsoldItems();
+            expect(unsoldItems.length).to.be.equal(2);
+
+            await market.connect(buyer).createMarketSale(1, { value: auctionPrice });
+
+            unsoldItems = await market.getUnsoldItems();
+            expect(unsoldItems.length).to.be.equal(1);
+
+        });
+
+        it("Should get user`s NFT that was bought", async () => {
+            await nft.mintToken('https-p1');
+            await nft.mintToken('https-p2');
+            await nft.mintToken('https-p3');
+
+            let auctionPrice = ethers.utils.parseUnits('0.02', 'ether');
+
+            await market.createMarketItem(1, auctionPrice, { value: listingPrice });
+            await market.createMarketItem(2, auctionPrice, { value: listingPrice });
+            await market.createMarketItem(3, auctionPrice, { value: listingPrice });
+
+            let myNFTs = await market.connect(buyer).getMyNFTs();
+            expect(myNFTs.length).to.be.equal(0);
+
+            await market.connect(buyer).createMarketSale(1, { value: auctionPrice });
+            await market.connect(buyer).createMarketSale(2, { value: auctionPrice });
+
+            myNFTs = await market.connect(buyer).getMyNFTs();
+            expect(myNFTs.length).to.be.equal(2);
+
+        });
+
+        it("Should get only minted NFT", async () => {
+            await nft.mintToken('https-p1');
+            await nft.mintToken('https-p2');
+            await nft.mintToken('https-p3');
+
+            let auctionPrice = ethers.utils.parseUnits('0.02', 'ether');
+
+            await market.createMarketItem(1, auctionPrice, { value: listingPrice });
+
+            let mintedNFTs = await market.getOnlyCreatedItems();
+            expect(mintedNFTs.length).to.be.equal(1);
+
+            await market.createMarketItem(3, auctionPrice, { value: listingPrice });
+
+            mintedNFTs = await market.getOnlyCreatedItems();
+            expect(mintedNFTs.length).to.be.equal(2);
+
+            mintedNFTs = await market.connect(buyer).getOnlyCreatedItems();
+            expect(mintedNFTs.length).to.be.equal(0);
+
+        });
+
+
     });
 });

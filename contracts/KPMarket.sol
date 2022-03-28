@@ -187,7 +187,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
             if (idToMarketToken[i + 1].owner == msg.sender) {
                 uint256 currentId = idToMarketToken[i + 1].itemId;
                 MarketToken storage currentItem = idToMarketToken[currentId];
-                items[currentId] = currentItem;
+                items[currentIndex] = currentItem;
                 currentIndex++;
             }
         }
@@ -218,7 +218,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
             if (idToMarketToken[i + 1].seller == msg.sender) {
                 uint256 currentId = idToMarketToken[i + 1].itemId;
                 MarketToken storage currentItem = idToMarketToken[currentId];
-                items[currentId] = currentItem;
+                items[currentIndex] = currentItem;
                 currentIndex++;
             }
         }
