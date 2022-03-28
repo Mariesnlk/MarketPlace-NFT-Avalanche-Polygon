@@ -1,5 +1,4 @@
-const { SignerWithAddress } = require("@nomiclabs/hardhat-ethers/signers");
-const { expect, chai } = require("chai");
+const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("Vendor", () => {
