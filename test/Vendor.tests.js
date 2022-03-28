@@ -1,10 +1,12 @@
-const { SignerWithAddress } = require ("@nomiclabs/hardhat-ethers/signers");
-const { expect, chai } = require ("chai");
-const { ethers} = require ("hardhat");
+const { SignerWithAddress } = require("@nomiclabs/hardhat-ethers/signers");
+const { expect, chai } = require("chai");
+const { ethers } = require("hardhat");
 
 describe("Vendor", () => {
-    
+
+    let Token;
     let token;
+    let Vendor;
     let vendorContract;
 
     let name = "Staking Token"
@@ -14,13 +16,18 @@ describe("Vendor", () => {
     beforeEach(async () => {
         [owner, beneficiary1, beneficiary2, beneficiary3, beneficiary4, beneficiary5, ...otherAccounts] = await ethers.getSigners();
 
-        const Token = await ethers.getContractFactory('Token');
-        const Vendor = await ethers.getContractFactory('Vendor');
+        Token = await ethers.getContractFactory('Token');
+        Vendor = await ethers.getContractFactory('Vendor');
         token = await Token.deploy(name, symbol, totalSupply);
         vendorContract = await Vendor.deploy(token.address);
     });
 
     describe('Deploy contracts', async () => {
+        it('Should reverted deploying with zero address', async () => {
+            await expect(Vendor.deploy('0x0000000000000000000000000000000000000000'))
+                .to.be.revertedWith("Vendor: Invalid token address");
+        });
+
         it('Should contracts not to be ..', async () => {
             expect(token.address).to.be.not.undefined;
             expect(token.address).to.be.not.null;
@@ -43,7 +50,7 @@ describe("Vendor", () => {
 
         it('Should initialize vendor contract correct', async () => {
             expect(await token.balanceOf(vendorContract.address)).to.be.equal(0)
-            expect(await vendorContract.owner()).to.be.equal(await owner.address)
+            expect(await vendorContract.owner()).to.be.equal(owner.address)
         });
     });
 
@@ -55,8 +62,8 @@ describe("Vendor", () => {
         });
 
         it('Should  reverted because a negative price', async () => {
-            await expect(vendorContract.setPrice(ethers.utils.parseUnits('0', 'ether')))
-                .to.be.revertedWith("VestingToken: price cannot be low or equal zero");
+            await expect(vendorContract.setPrice((ethers.utils.parseUnits('0', 'ether'))))
+                .to.be.revertedWith("Vendor: price cannot be low or equal zero");
         });
 
         it('Should successfully set price', async () => {
@@ -67,13 +74,10 @@ describe("Vendor", () => {
     });
 
     describe('Buy tokens', async () => {
-
-        beforeEach(async () => {
+        it('Should reverted because value is negative number', async () => {
             await vendorContract.setPrice(ethers.utils.parseUnits('0.05', 'ether'));
             await token.transfer(vendorContract.address, token.balanceOf(owner.address));
-        });
 
-        it('Should reverted because value is negative number', async () => {
             const amount = ethers.utils.parseUnits('0', 'ether');
             await expect(
                 vendorContract.connect(beneficiary1).buyTokens({
@@ -82,19 +86,22 @@ describe("Vendor", () => {
             ).to.be.revertedWith("Vendor: value cannot be low or equal zero");
         });
 
-        // it('Should reverted because not enough tokens in contract', async () => {
-        //     await token.increaseAllowance(owner.address, token.balanceOf(vendorContract.address));
-        //     await token.transferFrom(vendorContract.address, owner.address, token.balanceOf(vendorContract.address));
+        it('Should reverted because vnot enought tokens in contract balance', async () => {
+            await vendorContract.setPrice(ethers.utils.parseUnits('0.05', 'ether'));
+            await token.transfer(vendorContract.address, 5);
 
-        //     const amount = ethers.utils.parseUnits('999', 'ether');
-        //     await expect(
-        //         vendorContract.connect(beneficiary1).buyTokens({
-        //             value: amount,
-        //         }),
-        //     ).to.be.revertedWith("Vendor: contract has not enough tokens in its balance");
-        // });
+            const amount = ethers.utils.parseUnits('5', 'ether');
+            await expect(
+                vendorContract.connect(beneficiary1).buyTokens({
+                    value: amount,
+                }),
+            ).to.be.revertedWith("Vendor: contract has not enough tokens in its balance");
+        });
 
         it('Should successfully buy tokens', async () => {
+            await vendorContract.setPrice(ethers.utils.parseUnits('0.05', 'ether'));
+            await token.transfer(vendorContract.address, token.balanceOf(owner.address));
+
             const amount = ethers.utils.parseUnits('5', 'ether');
             await expect(
                 vendorContract.connect(beneficiary1).buyTokens({
@@ -116,6 +123,9 @@ describe("Vendor", () => {
         });
 
         it('Should successfully buy tokens and return change', async () => {
+            await vendorContract.setPrice(ethers.utils.parseUnits('0.05', 'ether'));
+            await token.transfer(vendorContract.address, token.balanceOf(owner.address));
+
             const amount = ethers.utils.parseUnits('5.01', 'ether');
             await expect(
                 vendorContract.connect(beneficiary1).buyTokens({
@@ -123,7 +133,7 @@ describe("Vendor", () => {
                 }),
             )
                 .to.emit(vendorContract, 'BoughtToken')
-                .withArgs(beneficiary1.address, ethers.utils.parseUnits('5', 'ether'), 100);
+                .withArgs(beneficiary1.address, (ethers.utils.parseUnits('5', 'ether')), 100);
 
             const userTokenBalance = await token.balanceOf(beneficiary1.address);
             const userTokenAmount = 100;
@@ -133,7 +143,7 @@ describe("Vendor", () => {
             expect(vendorTokenBalance).to.equal(999999900);
 
             const vendorBalance = await ethers.provider.getBalance(vendorContract.address);
-            expect(vendorBalance).to.equal(ethers.utils.parseUnits('5', 'ether'));
+            expect(vendorBalance).to.equal((ethers.utils.parseUnits('5', 'ether')));
         });
 
     });
@@ -141,7 +151,7 @@ describe("Vendor", () => {
     describe('sell tokens', async () => {
 
         beforeEach(async () => {
-            await vendorContract.setPrice(ethers.BigNumber.from(ethers.utils.parseUnits('0.05', 'ether')));
+            await vendorContract.setPrice(ethers.utils.parseUnits('0.05', 'ether'));
             await token.transfer(vendorContract.address, token.balanceOf(owner.address));
 
             const amount = ethers.utils.parseUnits('5', 'ether');
@@ -149,8 +159,6 @@ describe("Vendor", () => {
             await vendorContract.connect(beneficiary1).buyTokens({
                 value: amount,
             });
-
-            // console.log(await token.balanceOf(beneficiary1.address))
         });
 
         it('Should reverted because amount is negative number', async () => {
@@ -242,4 +250,3 @@ describe("Vendor", () => {
     });
 
 });
-

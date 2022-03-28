@@ -24,7 +24,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
     }
 
     // tokenId return which MarketToken - fetch which one it is
-    mapping(uint256 => MarketToken) private idToMarketToken;
+    mapping(uint256 => MarketToken) public idToMarketToken;
 
     function setNFTContractAddress(address nftContract_) external {
         require(
@@ -38,6 +38,10 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
         require(
             owner == msg.sender,
             "KPMarket: only marketplace owner can update listing price."
+        );
+        require(
+            _listingPrice > 0,
+            "KPMarket: listing price value should be more than 0."
         );
         listingPrice = _listingPrice;
     }
@@ -76,7 +80,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
 
         nftContract.transferFrom(msg.sender, address(this), tokenId);
 
-        emit MarketTokenMinted(
+        emit MarketTokenCreated(
             itemId,
             address(nftContract),
             tokenId,
@@ -87,7 +91,11 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
         );
     }
 
-    function resellToken(uint256 tokenId, uint256 price) external payable override {
+    function resellToken(uint256 tokenId, uint256 price)
+        external
+        payable
+        override
+    {
         require(
             idToMarketToken[tokenId].owner == msg.sender,
             "KPMarket: only item owner can perform this operation"
@@ -161,12 +169,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard {
     }
 
     // return nfts that the user has purchased
-    function getMyNFTs()
-        external
-        view
-        override
-        returns (MarketToken[] memory)
-    {
+    function getMyNFTs() external view override returns (MarketToken[] memory) {
         uint256 totalItemCount = tokenIds.current();
         //counter for each individual user
         uint256 itemCount = 0;

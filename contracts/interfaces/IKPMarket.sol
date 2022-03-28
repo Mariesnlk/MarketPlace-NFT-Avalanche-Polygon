@@ -2,7 +2,7 @@
 pragma solidity ^0.8.4;
 
 interface IKPMarket {
-    event MarketTokenMinted(
+    event MarketTokenCreated(
         uint256 indexed itemId,
         address indexed nftContract,
         uint256 indexed tokenId,

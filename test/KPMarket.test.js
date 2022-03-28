@@ -12,9 +12,10 @@ describe("KPMarket", () => {
     let nftContractAddress;
 
     let auctionPrice;
+    let listingPrice;
 
     beforeEach(async () => {
-        [owner, minter, beneficiary2, beneficiary3, beneficiary4, beneficiary5, ...otherAccounts] = await ethers.getSigners();
+        [creater, minter, buyer, buyer2, beneficiary4, beneficiary5, ...otherAccounts] = await ethers.getSigners();
 
         const Market = await ethers.getContractFactory('KPMarket');
         market = await Market.deploy();
@@ -26,11 +27,7 @@ describe("KPMarket", () => {
 
         await market.setNFTContractAddress(nftContractAddress);
 
-        // test to receive listing price and auction price
-        let listingPrice = await market.getListingPrice()
-        listingPrice = listingPrice.toString()
-
-        auctionPrice = ethers.utils.parseUnits('100', 'ether')
+        listingPrice = await market.getListingPrice();
 
     });
 
@@ -56,40 +53,110 @@ describe("KPMarket", () => {
                 .withArgs(minter.address, 'https-p2', 2);
         });
 
-        it("Should mint and trade NFTs", async () => {
+        it("Upgate listing price", async () => {
+            expect(listingPrice).to.be.equal(ethers.utils.parseUnits('0.045', 'ether'));
 
-            await nft.mintToken('https-p1');
-            await nft.mintToken('https-p2');
+            await expect(market.connect(buyer).updateListingPrice(ethers.utils.parseUnits('0.035', 'ether')))
+                .to.be.revertedWith("KPMarket: only marketplace owner can update listing price.");
 
-            await market.makeMarketItem(nftContractAddress, 1, auctionPrice, { value: listingPrice })
-            await market.makeMarketItem(nftContractAddress, 2, auctionPrice, { value: listingPrice })
+            await expect(market.updateListingPrice(ethers.utils.parseUnits('0', 'ether')))
+                .to.be.revertedWith("KPMarket: listing price value should be more than 0.");
 
-            // test for different addresses from different users - test accounts
-            // return an array of however many addresses
-            const [_, buyerAddress] = await ethers.getSigners()
-
-            // create a market sale with address, id and price
-            await market.connect(buyerAddress).createMarketSale(nftContractAddress, 1, { value: auctionPrice })
-
-            let items = await market.fetchMarketTokens()
-
-            items = await Promise.all(items.map(async i => {
-                // get the uri of the value
-                const tokenUri = await nft.tokenURI(i.tokenId)
-                let item = {
-                    price: i.price.toString(),
-                    tokenId: i.tokenId.toString(),
-                    seller: i.seller,
-                    owner: i.owner,
-                    tokenUri
-                }
-                return item;
-            }))
-
-            // test out all items
-            console.log('items', items)
+            await market.updateListingPrice(ethers.utils.parseUnits('0.035', 'ether'));
+            listingPrice = await market.getListingPrice();
+            expect(listingPrice).to.be.equal(ethers.utils.parseUnits('0.035', 'ether'));
 
         });
 
+        it("Should create market item(NFT token)", async () => {
+            await nft.mintToken('https-p1');
+
+            await expect(market.createMarketItem(1, ethers.utils.parseUnits('0', 'ether'), { value: listingPrice }))
+                .to.be.revertedWith("KPMarket: price must be at least one wei");
+
+            let auctionPrice = ethers.utils.parseUnits('0.02', 'ether');
+
+            await expect(market.createMarketItem(1, auctionPrice, { value: ethers.utils.parseUnits('0.035', 'ether') }))
+                .to.be.revertedWith("KPMarket: price must be equal to listening price");
+
+            await expect(market.createMarketItem(1, auctionPrice, { value: listingPrice }))
+                .to.emit(market, 'MarketTokenCreated')
+                .withArgs(1, nft.address, 1, creater.address, '0x0000000000000000000000000000000000000000', auctionPrice, false);
+
+        });
+
+        it("Should create market sale fot NFT token", async () => {
+            await nft.mintToken('https-p1');
+
+            let auctionPrice = ethers.utils.parseUnits('0.02', 'ether');
+
+            await market.createMarketItem(1, auctionPrice, { value: listingPrice });
+
+            await expect(market.connect(buyer).createMarketSale(1, { value: ethers.utils.parseUnits('0.002', 'ether') }))
+                .to.be.revertedWith("KPMarket: please submit the asking price in order to continue");
+
+            await market.connect(buyer).createMarketSale(1, { value: auctionPrice });
+
+            const [itemId,
+                nftContract,
+                tokenId,
+                seller,
+                owner,
+                price,
+                likes,
+                sold] = await market.idToMarketToken(1);
+            expect(itemId).to.be.equal(1);
+            expect(nftContract).to.be.equal(nft.address);
+            expect(tokenId).to.be.equal(1);
+            expect(seller).to.be.equal(creater.address);
+            expect(owner).to.be.equal(buyer.address);
+            expect(price).to.be.equal(auctionPrice);
+            expect(likes).to.be.equal(0);
+            expect(sold).to.be.true;
+
+        });
+
+        it("Should create resale fot NFT token", async () => {
+            await nft.mintToken('https-p1');
+            await nft.mintToken('https-p2');
+
+            let auctionPrice = ethers.utils.parseUnits('0.02', 'ether');
+
+            await market.createMarketItem(1, auctionPrice, { value: listingPrice });
+            await market.createMarketItem(2, auctionPrice, { value: listingPrice });
+
+            await market.connect(buyer).createMarketSale(1, { value: auctionPrice });
+            await market.connect(buyer2).createMarketSale(2, { value: auctionPrice });
+
+            let resalePrice = ethers.utils.parseUnits('0.022', 'ether');
+
+            await expect(market.connect(buyer).resellToken(2, resalePrice, { value: listingPrice }))
+                .to.be.revertedWith("KPMarket: only item owner can perform this operation");
+
+            await expect(market.connect(buyer).resellToken(1, resalePrice, { value: resalePrice }))
+                .to.be.revertedWith("KPMarket: price must be equal to listing price");
+
+            await nft.connect(buyer).approve(market.address, 1);
+            await market.connect(buyer).resellToken(1, resalePrice, { value: listingPrice });
+
+            const [itemId,
+                nftContract,
+                tokenId,
+                seller,
+                owner,
+                price,
+                likes,
+                sold] = await market.idToMarketToken(1);
+            expect(itemId).to.be.equal(1);
+            expect(nftContract).to.be.equal(nft.address);
+            expect(tokenId).to.be.equal(1);
+            expect(seller).to.be.equal(buyer.address);
+            expect(owner).to.be.equal(market.address);
+            expect(price).to.be.equal(resalePrice);
+            expect(likes).to.be.equal(0);
+            expect(sold).to.be.false;
+
+        });
+        
     });
 });
