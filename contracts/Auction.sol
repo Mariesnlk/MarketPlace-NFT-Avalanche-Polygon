@@ -32,31 +32,6 @@ contract Auction is IAuction {
         address _nftAddress,
         uint256 _tokenId
     ) {
-        require(
-            _creator != address(0),
-            "Auction: Creator of the auction can't be zero address"
-        );
-        require(
-            _endTime > block.timestamp,
-            "Auction: finish time of auction cannot be less than current time"
-        );
-        require(
-            _minIncrement >= 0,
-            "Auction: min increment for bid annot be less than 0"
-        );
-        require(
-            _directBuyPrice > 0,
-            "Auction: buy price cannot be less than 0"
-        );
-        require(
-            _startPrice >= _directBuyPrice,
-            "Auction: start price cannot be less direct price"
-        );
-        require(
-            _nftAddress != address(0),
-            "Auction: NFT address can't be zero address"
-        );
-        require(_tokenId > 0, "Auction: token id cannot be less than 0");
 
         creator = _creator;
         startTime = block.timestamp;

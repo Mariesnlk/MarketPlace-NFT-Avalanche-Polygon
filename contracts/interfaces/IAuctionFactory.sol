@@ -30,7 +30,7 @@ interface IAuctionFactory {
 
     /** @dev return the information of each auction address
      */
-    function getAuctionInfo(address[] calldata _auctionsList)
+    function getAuctionsInfo(address[] calldata _auctionsList)
         external
         view
         returns (

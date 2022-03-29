@@ -9,11 +9,11 @@ import "./Auction.sol";
 contract AuctionFactory is IAuctionFactory {
     using Counters for Counters.Counter;
     Counters.Counter private auctionIds;
-    uint256 private constant minAuctionDuration = 5 minutes;
+    uint256 private minAuctionDuration = 5 minutes;
 
     mapping(uint256 => Auction) public auctions;
 
-    // TODO investigate if Factoey pattern can have constructor
+    // requirePermission(ROLE_ADMIN)
 
     /** @dev create an auction
      */
@@ -26,17 +26,34 @@ contract AuctionFactory is IAuctionFactory {
         uint256 _tokenId
     ) external override returns (bool) {
         require(
+            msg.sender != address(0),
+            "Auction: Creator of the auction can't be zero address"
+        );
+        require(
+            _endTime > block.timestamp,
+            "Auction: finish time of auction cannot be less than current time"
+        );
+        require(
+            _endTime >= minAuctionDuration,
+            "Auction: end time must be greater than 5 minutes"
+        );
+        require(
+            _minIncrement > 0,
+            "Auction: min increment for bid annot be less than 0"
+        );
+        require(
             _directBuyPrice > 0,
-            "AuctionFactory: direct buy price must be greater than 0"
+            "Auction: buy price cannot be less than 0"
         );
         require(
             _startPrice < _directBuyPrice,
-            "AuctionFactory: start price is smaller than direct buy price"
+            "Auction: start price is smaller than direct buy price"
         );
         require(
-            _endTime > minAuctionDuration,
-            "AuctionFactory: end time must be greater than 5 minutes"
+            _nftAddress != address(0),
+            "Auction: NFT address can't be zero address"
         );
+        require(_tokenId > 0, "Auction: token id cannot be less than 0");
 
         uint256 auctionId = auctionIds.current();
         auctionIds.increment();
@@ -86,7 +103,7 @@ contract AuctionFactory is IAuctionFactory {
 
     /** @dev return the information of each auction address
      */
-    function getAuctionInfo(address[] calldata _auctionsList)
+    function getAuctionsInfo(address[] calldata _auctionsList)
         external
         view
         override
