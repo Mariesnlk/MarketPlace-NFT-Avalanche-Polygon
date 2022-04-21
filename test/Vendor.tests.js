@@ -1,5 +1,8 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const {
+    constants
+} = require("@openzeppelin/test-helpers");
 
 describe("Vendor", () => {
 
@@ -23,7 +26,7 @@ describe("Vendor", () => {
 
     describe('Deploy contracts', async () => {
         it('Should reverted deploying with zero address', async () => {
-            await expect(Vendor.deploy('0x0000000000000000000000000000000000000000'))
+            await expect(Vendor.deploy(constants.ZERO_ADDRESS))
                 .to.be.revertedWith("Vendor: Invalid token address");
         });
 

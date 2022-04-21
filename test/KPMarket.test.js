@@ -1,5 +1,8 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const {
+    constants
+} = require("@openzeppelin/test-helpers");
 
 
 describe("KPMarket", () => {
@@ -32,7 +35,7 @@ describe("KPMarket", () => {
     describe('Intercat with marketplace', async () => {
 
         it('Should reverted deploying with zero address', async () => {
-            await expect(market.setNFTContractAddress('0x0000000000000000000000000000000000000000'))
+            await expect(market.setNFTContractAddress(constants.ZERO_ADDRESS))
                 .to.be.revertedWith("KPMarket: invalid nftContract address");
         });
 
@@ -84,7 +87,7 @@ describe("KPMarket", () => {
 
             await expect(market.createMarketItem(1, auctionPrice, { value: listingPrice }))
                 .to.emit(market, 'MarketTokenCreated')
-                .withArgs(1, nft.address, 1, creater.address, '0x0000000000000000000000000000000000000000', auctionPrice, false);
+                .withArgs(1, nft.address, 1, creater.address, constants.ZERO_ADDRESS, auctionPrice, false);
 
         });
 

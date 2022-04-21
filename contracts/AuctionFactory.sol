@@ -9,13 +9,17 @@ import "./Auction.sol";
 contract AuctionFactory is IAuctionFactory {
     using Counters for Counters.Counter;
     Counters.Counter private auctionIds;
+    // @notice
     uint256 private minAuctionDuration = 5 minutes;
-
+    // @notice
     mapping(uint256 => Auction) public auctions;
+    // @notice
+    mapping(uint256 => address) public auctionAddresses;
 
     // requirePermission(ROLE_ADMIN)
 
-    /** @dev create an auction
+    /**
+     * @dev create an auction
      */
     function createAuction(
         uint256 _endTime,
@@ -26,35 +30,9 @@ contract AuctionFactory is IAuctionFactory {
         uint256 _tokenId
     ) external override returns (bool) {
         require(
-            msg.sender != address(0),
-            "Auction: Creator of the auction can't be zero address"
-        );
-        require(
-            _endTime > block.timestamp,
-            "Auction: finish time of auction cannot be less than current time"
-        );
-        require(
             _endTime >= minAuctionDuration,
             "Auction: end time must be greater than 5 minutes"
         );
-        require(
-            _minIncrement > 0,
-            "Auction: min increment for bid annot be less than 0"
-        );
-        require(
-            _directBuyPrice > 0,
-            "Auction: buy price cannot be less than 0"
-        );
-        require(
-            _startPrice < _directBuyPrice,
-            "Auction: start price is smaller than direct buy price"
-        );
-        require(
-            _nftAddress != address(0),
-            "Auction: NFT address can't be zero address"
-        );
-        require(_tokenId > 0, "Auction: token id cannot be less than 0");
-
         uint256 auctionId = auctionIds.current();
         auctionIds.increment();
         Auction auction = new Auction(
@@ -70,6 +48,7 @@ contract AuctionFactory is IAuctionFactory {
         IERC721 nftToken = IERC721(_nftAddress);
         nftToken.transferFrom(msg.sender, address(auction), _tokenId);
         auctions[auctionId] = auction;
+        auctionAddresses[auctionId] = address(auction);
 
         emit CreatedAuction(
             msg.sender,
@@ -85,7 +64,8 @@ contract AuctionFactory is IAuctionFactory {
         return true;
     }
 
-    /** @dev return a list of all auctions
+    /**
+     * @dev return a list of all auctions
      */
     function getAuctions()
         external
@@ -101,7 +81,8 @@ contract AuctionFactory is IAuctionFactory {
         return _auctions;
     }
 
-    /** @dev return the information of each auction address
+    /**
+     *@dev return the information of each auction address
      */
     function getAuctionsInfo(address[] calldata _auctionsList)
         external
