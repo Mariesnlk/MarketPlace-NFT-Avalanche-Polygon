@@ -2,26 +2,39 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./interfaces/IAuction.sol";
 
-contract Auction is IAuction {
-    uint256 private startTime; // The block timestamp which marks the start of the auction
-    address private maxBidder; // The address of the maximum bidder
-    bool private isCancelled; // If the the auction is cancelled
-    bool private isDirectBuy; // True if the auction ended due to direct buy
-    uint256 private minIncrement; // The minimum increment for the bid
-    address private nftAddress;
-
-    IERC721 private nft; // The NFT token
-
-    Bid[] private bids; // The bids made by the bidders
-
-    uint256 public endTime; // Timestamp of the end of the auction (in seconds)
-    uint256 public maxBid; // The maximum bid
-    address public creator; // The address of the auction creator
-    uint256 public tokenId; // The id of the token
-    uint256 public directBuyPrice; // The price for a direct buy
-    uint256 public startPrice; // The starting price for the auction
+/// @title Auction contract
+contract Auction is IAuction, ReentrancyGuard {
+    /// @notice the block timestamp which marks the start of the auction
+    uint256 public startTime;
+    /// @notice the block timestamp which marks the end of the auction (in seconds)
+    uint256 public endTime;
+    /// @notice the address of the maximum bidder
+    address public maxBidder;
+    /// @notice the maximum bid
+    uint256 public maxBid;
+    /// @notice is the the auction is cancelled
+    bool public isCancelled;
+    /// @notice is the auction ended due to direct buy
+    bool public isDirectBuy;
+    /// @notice the minimum increment for the bid
+    uint256 public minIncrement;
+    /// @notice is the auction exists
+    bool public isExists;
+    /// @notice the address of the auction creator
+    address public creator;
+    /// @notice the id of the token
+    uint256 public tokenId;
+    /// @notice the price for a direct buy
+    uint256 public directBuyPrice;
+    /// @notice the starting price for the auction
+    uint256 public startPrice;
+    /// @notice NFT address
+    IERC721 public nft;
+    /// @notice array of the bids made by the bidders
+    Bid[] public bids;
 
     constructor(
         address _creator,
@@ -57,7 +70,7 @@ contract Auction is IAuction {
             "Auction: NFT address can't be zero address"
         );
         require(_tokenId > 0, "Auction: token id cannot be less than 0");
-        
+
         creator = _creator;
         startTime = block.timestamp;
         endTime = startTime + _endTime;
@@ -65,14 +78,15 @@ contract Auction is IAuction {
         directBuyPrice = _directBuyPrice;
         startPrice = _startPrice;
         nft = IERC721(_nftAddress);
-        nftAddress = _nftAddress;
         tokenId = _tokenId;
         maxBidder = _creator;
+        isExists = true;
     }
 
-    /** @dev - Place a bid on the auction
-     */
-    function placeBid() external payable override returns (bool) {
+    /**
+     * @dev Place a bid on the auction
+     **/
+    function placeBid() external payable override nonReentrant returns (bool) {
         require(
             msg.sender != creator,
             "Auction: the bidder cannot be the auction creator"
@@ -114,8 +128,9 @@ contract Auction is IAuction {
         return true;
     }
 
-    /** @dev - Withdraw the token after the auction is over
-     */
+    /**
+     * @dev Withdraw the token after the auction is over
+     **/
     function withdrawToken() external override {
         require(
             getAuctionState() == AuctionState.ENDED ||
@@ -132,9 +147,10 @@ contract Auction is IAuction {
         emit WithdrawToken(maxBidder);
     }
 
-    /** @dev - Withdraw the funds after the auction is over
-     */
-    function withdrawFunds() external override {
+    /**
+     * @dev Withdraw the funds after the auction is over
+     **/
+    function withdrawFunds() external override nonReentrant {
         require(
             getAuctionState() == AuctionState.ENDED ||
                 getAuctionState() == AuctionState.DIRECT_BUY,
@@ -151,8 +167,9 @@ contract Auction is IAuction {
         emit WithdrawFunds(msg.sender, maxBid);
     }
 
-    /** @dev - Cancel the auction
-     */
+    /**
+     * @dev Cancel the auction
+     **/
     function cancelAuction() external override returns (bool) {
         require(
             msg.sender == creator,
@@ -166,6 +183,7 @@ contract Auction is IAuction {
             maxBid == 0,
             "Auction: the auction must not be cancelled if there is a bid"
         );
+
         isCancelled = true;
 
         // Transfer the NFT token to the auction creator
@@ -176,8 +194,9 @@ contract Auction is IAuction {
         return true;
     }
 
-    /** @dev - Returns a list of all bids and addresses
-     */
+    /**
+     * @dev Get a list of all bids and addresses
+     **/
     function allBids()
         external
         view
@@ -193,8 +212,9 @@ contract Auction is IAuction {
         return (addressesOfBidders, bidsPrices);
     }
 
-    /** @dev - Get the auction state
-     */
+    /**
+     * @dev Get the auction state
+     **/
     function getAuctionState() public view override returns (AuctionState) {
         if (isCancelled) {
             return AuctionState.CANCELLED;

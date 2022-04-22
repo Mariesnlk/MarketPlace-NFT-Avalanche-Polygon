@@ -7,10 +7,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./interfaces/IVendor.sol";
 
-contract Vendor is IVendor, Ownable, ReentrancyGuard  {
+contract Vendor is IVendor, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
+    // @noticw token address
     IERC20 private immutable token;
-    // set default price
+    // @noticw default price for 1 Token
     uint256 public price = 0.008 ether;
 
     constructor(address token_) {
@@ -18,24 +19,31 @@ contract Vendor is IVendor, Ownable, ReentrancyGuard  {
         token = IERC20(token_);
     }
 
-    // before buy transfer tokens from owner to vendor contract address
-
-    /** @dev - get tokens by caller depending on how much wei was sent to contract
-     *
-     * @return amounts - tokens amount that buy caller
+    /**
+     * @dev get tokens by caller depending on how much wei was sent to contract
+     * @notice return tokens amount that buy msg.sender
+     * @notice before buy transfer tokens from owner to vendor contract address
      */
-    function buyTokens() external payable override nonReentrant returns (uint256 amounts) {
+    function buyTokens()
+        external
+        payable
+        override
+        nonReentrant
+        returns (uint256 amounts)
+    {
         require(msg.value > 0, "Vendor: value cannot be low or equal zero");
 
         uint256 amountToBuy = msg.value / price;
         uint256 returnAmounts = msg.value % price;
         uint256 amountToPay = msg.value - returnAmounts;
+
         require(
             token.balanceOf(address(this)) >= amountToBuy,
             "Vendor: contract has not enough tokens in its balance"
         );
 
         token.safeTransfer(msg.sender, amountToBuy);
+
         emit BoughtToken(msg.sender, amountToPay, amountToBuy);
 
         if (returnAmounts != 0) {
@@ -46,11 +54,10 @@ contract Vendor is IVendor, Ownable, ReentrancyGuard  {
         return amountToBuy;
     }
 
-    // approve vendor contract
-
-    /** @dev - transfer amount of tokens back to the contract
-     *
-     * @param _amount - tokens amount that recipient wants to buy
+    /**
+     * @dev transfer amount of tokens back to the contract
+     * @param _amount tokens amount that recipient wants to buy
+     * @notice approve vendor contract
      */
     function sellTokens(uint256 _amount) external override nonReentrant {
         require(
@@ -66,22 +73,23 @@ contract Vendor is IVendor, Ownable, ReentrancyGuard  {
 
         uint256 amountToTransfer = _amount * price;
         uint256 ownerBalance = address(this).balance;
+
         require(
             ownerBalance >= amountToTransfer,
             "Vendor: contract has not enough funds to accept the sell request"
         );
 
         token.safeTransferFrom(msg.sender, address(this), _amount);
+
         emit SoldToken(msg.sender, _amount, amountToTransfer);
 
         (bool success, ) = msg.sender.call{value: amountToTransfer}("");
         require(success, "Vendor: failed to send ETH to the user");
     }
 
-    /** @dev - set price in wei for buy tokens
-     *
+    /**
+     * @dev - set price in wei for buy tokens
      * @param _price - token price
-     *
      * @return _newPrice - reurn new setted price
      */
     function setPrice(uint256 _price)
@@ -92,11 +100,15 @@ contract Vendor is IVendor, Ownable, ReentrancyGuard  {
     {
         require(_price > 0, "Vendor: price cannot be low or equal zero");
         price = _price;
+
         emit SettedPrice(price);
 
         return price;
     }
 
+    /**
+     * @dev allow the owner of the contract to withdraw eth
+     */
     function withdraw() external override onlyOwner {
         uint256 contractBalance = address(this).balance;
         require(

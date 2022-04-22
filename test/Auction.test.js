@@ -35,9 +35,9 @@ describe("AuctionFactory", () => {
         nft = await NFT.deploy(marketAddress);
         nftContractAddress = nft.address;
 
-        await market.setNFTContractAddress(nftContractAddress);
+        await market.setNFTContract(nftContractAddress);
 
-        listingPrice = await market.getListingPrice();
+        listingPrice = await market.listingPrice();
 
         const AuctionFactory = await ethers.getContractFactory('AuctionFactory');
         auctionFactory = await AuctionFactory.deploy();
@@ -64,7 +64,7 @@ describe("AuctionFactory", () => {
             tokenId
         );
 
-        auctionAddress = await auctionFactory.auctionAddresses(0);
+        auctionAddress = await auctionFactory.auctions(0);
         console.log(await auctionAddress)
 
         const Auction = await ethers.getContractFactory("Auction");
@@ -76,7 +76,7 @@ describe("AuctionFactory", () => {
 
     describe('Intercat with auction', async () => {
         describe('placeBid', async () => {
-            it.only('Should place bids to the auction', async () => {
+            it('Should place bids to the auction', async () => {
                 await auctionInstance.connect(bidder1).placeBid(
                     { value: ethers.utils.parseUnits('0.02', 'ether') }
                 );

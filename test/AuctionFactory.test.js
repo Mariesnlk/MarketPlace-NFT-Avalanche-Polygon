@@ -3,7 +3,6 @@ const { ethers } = require("hardhat");
 const {
     constants
 } = require("@openzeppelin/test-helpers");
-const { abi } = require('../artifacts/contracts/Auction.sol/Auction.json');
 
 describe("AuctionFactory", () => {
 
@@ -38,9 +37,9 @@ describe("AuctionFactory", () => {
         nft = await NFT.deploy(marketAddress);
         nftContractAddress = nft.address;
 
-        await market.setNFTContractAddress(nftContractAddress);
+        await market.setNFTContract(nftContractAddress);
 
-        listingPrice = await market.getListingPrice();
+        listingPrice = await market.listingPrice();
 
         const AuctionFactory = await ethers.getContractFactory('AuctionFactory');
         auctionFactory = await AuctionFactory.deploy();
@@ -83,7 +82,7 @@ describe("AuctionFactory", () => {
                 let blockNumBefore = await ethers.provider.getBlockNumber();
                 let blockBefore = await ethers.provider.getBlock(blockNumBefore);
                 let timestampBefore = blockBefore.timestamp;
-                endTime = timestampBefore + 60 * 60 * 24; // 1 day
+                endTime = timestampBefore;
                 minIncrement = ethers.utils.parseUnits('0.002', 'ether');
                 directBuyPrice = ethers.utils.parseUnits('5', 'ether');
                 startPrice = ethers.utils.parseUnits('0.02', 'ether');

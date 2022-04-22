@@ -23,6 +23,8 @@ async function main() {
     await nft.deployed();
     console.log("NFT address: ", nft.address);
 
+    await market.setNFTContract(nft.address);
+
     const AuctionFactory = await hre.ethers.getContractFactory("AuctionFactory");
     const auctionFactory = await AuctionFactory.deploy();
     await auctionFactory.deployed();

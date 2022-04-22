@@ -1,20 +1,40 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
+/// @title Define interface for Auction contract
 interface IAuction {
-    /** A new bid was placed
-     */
+    /**
+     * @dev emitted when a new bid was placed
+     * @param bidder address of user who bids
+     * @param bid the value that user bid for auction
+     **/
     event NewBid(address indexed bidder, uint256 bid);
-    /** The auction winner withdrawed the token
-     */
+
+    /**
+     * @dev emitted when an auction winner withdrawed the token
+     * @param withdrawer address that withdraw all tokens after auction
+     **/
     event WithdrawToken(address indexed withdrawer);
-    /** The auction owner withdrawed the funds
-     */
+
+    /**
+     * @dev emitted when the auction owner withdrawed the funds
+     * @param withdrawer address that withdraw the funds after auction
+     * @param amount value that withdraw by auction`s owner
+     **/
     event WithdrawFunds(address indexed withdrawer, uint256 amount);
-    /** The auction was cancelled
-     */
+
+    /**
+     * @dev emitted when the auctionis canselled
+     **/
     event AuctionCancelled();
 
+    /**
+     * @dev List of available states of auction
+     * @param OPEN When the owner of the auction creates it
+     * @param CANCELLED When the owner of the auction cancels it
+     * @param ENDED When the auction time is over
+     * @param DIRECT_BUY When tokens are withdraw after the auction is over
+     **/
     enum AuctionState {
         OPEN,
         CANCELLED,
@@ -22,35 +42,46 @@ interface IAuction {
         DIRECT_BUY
     }
 
+    /**
+     * @dev Struct of a bid
+     * @param sender address who passes a bid
+     * @param bid amount that is passed
+     **/
     struct Bid {
         address sender;
         uint256 bid;
     }
 
-    /** @dev - Place a bid on the auction
-     */
+    /**
+     * @dev Place a bid on the auction
+     **/
     function placeBid() external payable returns (bool);
 
-    /** @dev - Withdraw the token after the auction is over
-     */
+    /**
+     * @dev Withdraw the token after the auction is over
+     **/
     function withdrawToken() external;
 
-    /** @dev - Withdraw the funds after the auction is over
-     */
+    /**
+     * @dev Withdraw the funds after the auction is over
+     **/
     function withdrawFunds() external;
 
-    /** @dev - Cancel the auction
-     */
+    /**
+     * @dev Cancel the auction
+     **/
     function cancelAuction() external returns (bool);
 
-    /** @dev - Returns a list of all bids and addresses
-     */
+    /**
+     * @dev Get a list of all bids and addresses
+     **/
     function allBids()
         external
         view
         returns (address[] memory, uint256[] memory);
 
-    /** @dev - Get the auction state
-     */
+    /**
+     * @dev Get the auction state
+     **/
     function getAuctionState() external view returns (AuctionState);
 }

@@ -3,24 +3,44 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IAuctionFactory.sol";
+import "./interfaces/IAuction.sol";
 import "./Auction.sol";
 
-contract AuctionFactory is IAuctionFactory {
+/// @title AuctionFactory contract
+contract AuctionFactory is IAuctionFactory, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private auctionIds;
-    // @notice
-    uint256 private minAuctionDuration = 5 minutes;
-    // @notice
-    mapping(uint256 => Auction) public auctions;
-    // @notice
-    mapping(uint256 => address) public auctionAddresses;
-
-    // requirePermission(ROLE_ADMIN)
+    /// @notice min value auction duration
+    uint256 public minAuctionDuration = 5 minutes;
+    /// @notice auction id => auction info
+    mapping(uint256 => Auction) public auctionsIfo;
+    /// @notice auction id => auction address
+    mapping(uint256 => address) public auctions;
 
     /**
-     * @dev create an auction
+     * @dev set new minumum value of the auction duration
+     * @param auctionDuration minumum value of the auction duration
+     * @notice only owner can set
      */
+    function setMinAuctionDuration(uint256 auctionDuration) external onlyOwner {
+        require(
+            auctionDuration > 0,
+            "AuctionFactory: invalid min auction duration"
+        );
+        minAuctionDuration = auctionDuration;
+    }
+
+    /**
+     * @dev creating auction
+     * @param _endTime timestamp when the auction will be finished
+     * @param _minIncrement the minimum increment for the bid
+     * @param _directBuyPrice the price for a direct buy
+     * @param _startPrice the starting price for the auction
+     * @param _nftAddress address of the nft
+     * @param _tokenId the id of the token
+     **/
     function createAuction(
         uint256 _endTime,
         uint256 _minIncrement,
@@ -31,7 +51,7 @@ contract AuctionFactory is IAuctionFactory {
     ) external override returns (bool) {
         require(
             _endTime >= minAuctionDuration,
-            "Auction: end time must be greater than 5 minutes"
+            "Auction: invalid auction duration"
         );
         uint256 auctionId = auctionIds.current();
         auctionIds.increment();
@@ -47,8 +67,8 @@ contract AuctionFactory is IAuctionFactory {
 
         IERC721 nftToken = IERC721(_nftAddress);
         nftToken.transferFrom(msg.sender, address(auction), _tokenId);
-        auctions[auctionId] = auction;
-        auctionAddresses[auctionId] = address(auction);
+        auctionsIfo[auctionId] = auction;
+        auctions[auctionId] = address(auction);
 
         emit CreatedAuction(
             msg.sender,
@@ -65,7 +85,24 @@ contract AuctionFactory is IAuctionFactory {
     }
 
     /**
-     * @dev return a list of all auctions
+     * @dev deleting auction
+     * @notice only owner of the auction can delete
+     * @param auctionAddress address of the auction that will be deleted
+     **/
+    function deleteAuction(address auctionAddress)
+        external
+        override
+        returns (bool)
+    {
+        // TODO
+
+        IAuction(auctionAddress).cancelAuction();
+
+        return true;
+    }
+
+    /**
+     * @dev get a list of all auctions
      */
     function getAuctions()
         external
@@ -76,13 +113,13 @@ contract AuctionFactory is IAuctionFactory {
         uint256 getAuctionsIds = auctionIds.current();
         _auctions = new address[](getAuctionsIds);
         for (uint256 i = 0; i < getAuctionsIds; i++) {
-            _auctions[i] = address(auctions[i]);
+            _auctions[i] = address(auctionsIfo[i]);
         }
         return _auctions;
     }
 
     /**
-     *@dev return the information of each auction address
+     * @dev get the information of each auction address
      */
     function getAuctionsInfo(address[] calldata _auctionsList)
         external
@@ -107,13 +144,15 @@ contract AuctionFactory is IAuctionFactory {
         auctionState = new uint256[](_auctionsList.length);
 
         for (uint256 i = 0; i < _auctionsList.length; i++) {
-            directBuy[i] = Auction(auctions[i]).directBuyPrice();
-            owner[i] = Auction(auctions[i]).creator();
-            highestBid[i] = Auction(auctions[i]).maxBid();
-            tokenIds[i] = Auction(auctions[i]).tokenId();
-            endTime[i] = Auction(auctions[i]).endTime();
-            startPrice[i] = Auction(auctions[i]).startPrice();
-            auctionState[i] = uint256(Auction(auctions[i]).getAuctionState());
+            directBuy[i] = Auction(auctionsIfo[i]).directBuyPrice();
+            owner[i] = Auction(auctionsIfo[i]).creator();
+            highestBid[i] = Auction(auctionsIfo[i]).maxBid();
+            tokenIds[i] = Auction(auctionsIfo[i]).tokenId();
+            endTime[i] = Auction(auctionsIfo[i]).endTime();
+            startPrice[i] = Auction(auctionsIfo[i]).startPrice();
+            auctionState[i] = uint256(
+                Auction(auctionsIfo[i]).getAuctionState()
+            );
         }
 
         return (
