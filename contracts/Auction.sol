@@ -21,8 +21,6 @@ contract Auction is IAuction, ReentrancyGuard {
     bool public isDirectBuy;
     /// @notice the minimum increment for the bid
     uint256 public minIncrement;
-    /// @notice is the auction exists
-    bool public isExists;
     /// @notice the address of the auction creator
     address public creator;
     /// @notice the id of the token
@@ -80,7 +78,6 @@ contract Auction is IAuction, ReentrancyGuard {
         nft = IERC721(_nftAddress);
         tokenId = _tokenId;
         maxBidder = _creator;
-        isExists = true;
     }
 
     /**
@@ -116,7 +113,8 @@ contract Auction is IAuction, ReentrancyGuard {
         bids.push(Bid(msg.sender, msg.value));
 
         if (lastHighestBid != 0) {
-            // address(uint160(lastHightestBidder)).transfer(lastHighestBid); // refund the previous bid to the previous highest bidder
+            // address(uint160(lastHightestBidder)).transfer(lastHighestBid); 
+            // refund the previous bid to the previous highest bidder
             (bool success, ) = payable(lastHightestBidder).call{
                 value: lastHighestBid
             }("");

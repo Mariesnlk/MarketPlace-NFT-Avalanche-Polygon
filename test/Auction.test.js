@@ -64,7 +64,7 @@ describe("AuctionFactory", () => {
             tokenId
         );
 
-        auctionAddress = await auctionFactory.auctions(0);
+        const[auctionAddress, isExist] = await auctionFactory.auctionsInfo(0);
         console.log(await auctionAddress)
 
         const Auction = await ethers.getContractFactory("Auction");

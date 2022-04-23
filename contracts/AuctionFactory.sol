@@ -15,9 +15,9 @@ contract AuctionFactory is IAuctionFactory, Ownable {
     /// @notice min value auction duration
     uint256 public minAuctionDuration = 5 minutes;
     /// @notice auction id => auction info
-    mapping(uint256 => Auction) public auctionsIfo;
-    /// @notice auction id => auction address
-    mapping(uint256 => address) public auctions;
+    mapping(uint256 => Auction) public auctions;
+    /// @notice auction id => AuctionInfo (address, bool)
+    mapping(uint256 => AuctionInfo) public auctionsInfo;
 
     /**
      * @dev set new minumum value of the auction duration
@@ -67,8 +67,9 @@ contract AuctionFactory is IAuctionFactory, Ownable {
 
         IERC721 nftToken = IERC721(_nftAddress);
         nftToken.transferFrom(msg.sender, address(auction), _tokenId);
-        auctionsIfo[auctionId] = auction;
-        auctions[auctionId] = address(auction);
+        auctions[auctionId] = auction;
+        auctionsInfo[auctionId].auction = address(auction);
+        auctionsInfo[auctionId].isExists = true;
 
         emit CreatedAuction(
             msg.sender,
@@ -87,16 +88,18 @@ contract AuctionFactory is IAuctionFactory, Ownable {
     /**
      * @dev deleting auction
      * @notice only owner of the auction can delete
-     * @param auctionAddress address of the auction that will be deleted
+     * @param auctionId address of the auction that will be deleted
      **/
-    function deleteAuction(address auctionAddress)
-        external
-        override
-        returns (bool)
-    {
-        // TODO
+    function deleteAuction(uint256 auctionId) external override returns (bool) {
+        require(
+            auctionsInfo[auctionId].isExists,
+            "AuctionFactory: the auction is deleted"
+        );
 
-        IAuction(auctionAddress).cancelAuction();
+        IAuction(auctionsInfo[auctionId].auction).cancelAuction();
+
+        delete auctionsInfo[auctionId];
+        delete auctions[auctionId];
 
         return true;
     }
@@ -113,7 +116,7 @@ contract AuctionFactory is IAuctionFactory, Ownable {
         uint256 getAuctionsIds = auctionIds.current();
         _auctions = new address[](getAuctionsIds);
         for (uint256 i = 0; i < getAuctionsIds; i++) {
-            _auctions[i] = address(auctionsIfo[i]);
+            _auctions[i] = address(auctions[i]);
         }
         return _auctions;
     }
@@ -127,7 +130,7 @@ contract AuctionFactory is IAuctionFactory, Ownable {
         override
         returns (
             uint256[] memory directBuy,
-            address[] memory owner,
+            address[] memory holder,
             uint256[] memory highestBid,
             uint256[] memory tokenIds,
             uint256[] memory endTime,
@@ -136,7 +139,7 @@ contract AuctionFactory is IAuctionFactory, Ownable {
         )
     {
         directBuy = new uint256[](_auctionsList.length);
-        owner = new address[](_auctionsList.length);
+        holder = new address[](_auctionsList.length);
         highestBid = new uint256[](_auctionsList.length);
         tokenIds = new uint256[](_auctionsList.length);
         endTime = new uint256[](_auctionsList.length);
@@ -144,20 +147,20 @@ contract AuctionFactory is IAuctionFactory, Ownable {
         auctionState = new uint256[](_auctionsList.length);
 
         for (uint256 i = 0; i < _auctionsList.length; i++) {
-            directBuy[i] = Auction(auctionsIfo[i]).directBuyPrice();
-            owner[i] = Auction(auctionsIfo[i]).creator();
-            highestBid[i] = Auction(auctionsIfo[i]).maxBid();
-            tokenIds[i] = Auction(auctionsIfo[i]).tokenId();
-            endTime[i] = Auction(auctionsIfo[i]).endTime();
-            startPrice[i] = Auction(auctionsIfo[i]).startPrice();
+            directBuy[i] = Auction(auctions[i]).directBuyPrice();
+            holder[i] = Auction(auctions[i]).creator();
+            highestBid[i] = Auction(auctions[i]).maxBid();
+            tokenIds[i] = Auction(auctions[i]).tokenId();
+            endTime[i] = Auction(auctions[i]).endTime();
+            startPrice[i] = Auction(auctions[i]).startPrice();
             auctionState[i] = uint256(
-                Auction(auctionsIfo[i]).getAuctionState()
+                Auction(auctions[i]).getAuctionState()
             );
         }
 
         return (
             directBuy,
-            owner,
+            holder,
             highestBid,
             tokenIds,
             endTime,

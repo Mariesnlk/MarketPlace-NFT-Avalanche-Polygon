@@ -26,6 +26,16 @@ interface IAuctionFactory {
     );
 
     /**
+     * @dev struct of auction address and value if exists it or not
+     * @param auction auction address
+     * @param isExists is deleted auction
+     **/
+    struct AuctionInfo {
+        address auction;
+        bool isExists;
+    }
+
+    /**
      * @dev creating auction
      * @param _endTime timestamp when the auction will be finished
      * @param _minIncrement the minimum increment for the bid
@@ -46,9 +56,9 @@ interface IAuctionFactory {
     /**
      * @dev deleting auction
      * @notice only owner of the auction can delete
-     * @param auctionAddress address of the auction that will be deleted
+     * @param auctionId address of the auction that will be deleted
      **/
-    function deleteAuction(address auctionAddress) external returns (bool);
+    function deleteAuction(uint256 auctionId) external returns (bool);
 
     /**
      * @dev get a list of all auctions
@@ -63,7 +73,7 @@ interface IAuctionFactory {
         view
         returns (
             uint256[] memory directBuy,
-            address[] memory owner,
+            address[] memory holder,
             uint256[] memory highestBid,
             uint256[] memory tokenIds,
             uint256[] memory endTime,
