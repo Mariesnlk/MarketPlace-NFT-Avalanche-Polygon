@@ -40,8 +40,8 @@ interface IKPMarket {
         uint256 id;
         address nftContract;
         uint256 tokenId;
-        address payable creator;
-        address payable owner;
+        address creator;
+        address owner;
         uint256 price;
         uint256 likes;
         bool sold;

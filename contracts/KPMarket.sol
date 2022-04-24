@@ -22,6 +22,8 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
     // tokenId return which MarketToken - fetch which one it is
     mapping(uint256 => MarketNFT) public idToMarketToken;
 
+    //// TODO ERC2981: add implementation of the royalty standard, and the respective extensions for ERC721 and ERC1155
+
     /**
      * @dev set address to NFT contract
      */
@@ -76,8 +78,8 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
             itemId,
             address(nftContract),
             nftId,
-            payable(msg.sender),
-            payable(address(0)),
+            msg.sender,
+            address(0),
             price,
             0,
             false
@@ -122,8 +124,9 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
         );
         idToMarketToken[nftId].sold = false;
         idToMarketToken[nftId].price = price;
-        idToMarketToken[nftId].creator = payable(msg.sender);
-        idToMarketToken[nftId].owner = payable(address(this));
+        idToMarketToken[nftId].creator = msg.sender;
+        // resale to market
+        idToMarketToken[nftId].owner = address(this);
 
         tokenIds.decrement();
 
@@ -151,18 +154,22 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
             "KPMarket: please submit the asking price in order to continue"
         );
 
-        idToMarketToken[nftId].creator.transfer(msg.value);
+        // idToMarketToken[nftId].creator.transfer(msg.value);
+        (bool success, ) = payable(idToMarketToken[nftId].creator).call{
+            value: msg.value
+        }("");
+        require(success, "Failed to transfer Ether");
 
         nftContract.transferFrom(address(this), msg.sender, tokenId);
 
-        idToMarketToken[nftId].owner = payable(msg.sender);
+        idToMarketToken[nftId].owner = msg.sender;
         idToMarketToken[nftId].sold = true;
 
         tokenSold.increment();
 
         // payable(owner).transfer(listingPrice);
-        (bool success, ) = payable(msg.sender).call{value: listingPrice}("");
-        require(success, "Failed to transfer Ether");
+        (bool result, ) = payable(msg.sender).call{value: listingPrice}("");
+        require(result, "Failed to transfer Ether");
 
         return true;
     }
