@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.9;
 
 /// @title Define interface for AuctionFactory contract
 interface IAuctionFactory {
