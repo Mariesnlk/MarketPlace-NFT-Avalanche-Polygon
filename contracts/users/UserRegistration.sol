@@ -1,14 +1,27 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IUserRegistration.sol";
 
-contract UserRegistratuin is IUserRegistratuin {
+contract UserRegistratuin is IUserRegistratuin, Ownable {
+    using Counters for Counters.Counter;
+    Counters.Counter private usersIds;
+    /// @notice address of the wallet => struct of user`s info
+    mapping(address => UserDetail) private users;
 
-// TODO add getter without password param
-    mapping(address => UserDetail) private user;
+    // TODO delete account
+    // TODO update user`s info
+    // TODO get all users
 
-    // user registration function
+    /**
+     * @dev allows user to register in dapp to get access to merket
+     * @param _username nickname to login
+     * @param _password password to login
+     * @param _bio some more info about user (optional)
+     * @notice valigation of username and password in FE, bio field can be empty
+     **/
     function register(
         string memory _username,
         string memory _password,
@@ -19,39 +32,75 @@ contract UserRegistratuin is IUserRegistratuin {
             "Registration: user address cannot be 0"
         );
 
-        user[msg.sender].username = _username;
-        user[msg.sender].password = _password;
-        user[msg.sender].bio = _bio;
-        user[msg.sender].isUserLoggedIn = false;
+        usersIds.increment();
+        users[msg.sender].id = usersIds.current();
+        users[msg.sender].username = _username;
+        users[msg.sender].password = _password;
+        users[msg.sender].bio = _bio;
+        users[msg.sender].isUserLoggedIn = false;
+
+        emit Registered(usersIds.current(), _username, msg.sender);
 
         return true;
     }
 
-    // user login function
-    function login(string memory _password) external override returns (bool) {
+    /**
+     * @dev allows registered user log in dapp
+     * @param _username nickname to login
+     * @param _password password to login
+     **/
+    function login(string memory _username, string memory _password)
+        external
+        override
+        returns (bool)
+    {
         if (
-            keccak256(abi.encodePacked(user[msg.sender].password)) ==
-            keccak256(abi.encodePacked(_password))
+            (keccak256(abi.encodePacked(users[msg.sender].username)) ==
+                keccak256(abi.encodePacked(_username))) &&
+            (keccak256(abi.encodePacked(users[msg.sender].password)) ==
+                keccak256(abi.encodePacked(_password)))
         ) {
-            user[msg.sender].isUserLoggedIn = true;
-            return user[msg.sender].isUserLoggedIn;
+            users[msg.sender].isUserLoggedIn = true;
+            return users[msg.sender].isUserLoggedIn;
         } else {
             return false;
         }
     }
 
-    // check the user logged in or not
+    /**
+     * @dev checking if the user is logged in or not
+     */
     function checkIsUserLogged() external view override returns (bool) {
-        return user[msg.sender].isUserLoggedIn;
+        return users[msg.sender].isUserLoggedIn;
     }
 
-    // logout the user
+    /**
+     * @dev logout from dapp, all pages are invalid
+     */
     function logout() external override {
-        user[msg.sender].isUserLoggedIn = false;
+        users[msg.sender].isUserLoggedIn = false;
     }
 
-    // get user by address
-    function getUser() external view override returns (string memory, string memory) {
-        return (user[msg.sender].username, user[msg.sender].bio);
+    /**
+     * @dev get user username and bio
+     * @notice this info will be display in the personal page
+     */
+    function getUser()
+        external
+        view
+        override
+        returns (string memory, string memory)
+    {
+        return (users[msg.sender].username, users[msg.sender].bio);
     }
+
+    /**
+     * @dev get a list of all registered users
+     */
+    function getAllUsers()
+        external
+        view
+        override
+        returns (address[] memory _users)
+    {}
 }
