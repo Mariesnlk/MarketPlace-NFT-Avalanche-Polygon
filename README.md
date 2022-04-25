@@ -1,26 +1,92 @@
 # NFT Mapketplace DApp
 
-NFT Marketplace (for minting, buying and selling NFTs live with IPFS data hosting) onto Polygon as a layer2.   
-- Setting up the DApp development environment
-- Create a React app using the react-native
-- Compile and Deploy Smart Contracts to Blockchain with Hardhat functionality
-- Implementing industry standard NFT smart contracts for DApps with the ERC721 OpenZeppelin Contracts
-- IPFS data hosting with Infura Blockchain Suite Project Management
-- Implementing an NFT Minting form on the front end to lock in Metadata and Files for the DApp
-- Looping, iterating, and filtering through hash tables with Javascript and Solidity
-- Modern Card Design and UI with Tailwind and CSS
-- Hooking up a web3 provider to the Polygon and Ethereum network
-- Running full unit testing with Chai
+|  Title        | Marketplace for NFTs on Polygon |       
+| ------------- | --------------------------------|
+| Description   |Minting NFTs (ERC721) as a creator, sell them and get royalties from resale. As currecncy is used own market token `MARIPAINTZ` or ETH                               |
+| Solidity Version  | ^0.8.9                      |
+| License           | MIT         |
+| Author | Mariia Synelnyk
 
-# Developer tools
+---
 
-- OpenZeppelin - a library for secure smartcontracts
-- Hardhat - a development environment to compile, deploy, test, and debug your Ethereum software (can also use Truffle)
-- Web3.js - a complete and compact library for interacting with the Ethereum Blockchain and its ecosystem (can also use ethers.js)
+## Main Description 
+
+NFT Marketplace (for minting, buying and selling NFTs live with IPFS data hosting) onto Polygon as a layer2.  
+
+---
+
+## Developer tools
+- Solidity - an object-oriented, high-level language for implementing smart contracts
+- OpenZeppelin - a library for secure smart contract development
+- Hardhat - a development environment to compile, deploy, test, and debug the process of building smart contracts and dApps (can also use Waffle)
+- Web3.js - a collection of libraries that allow you to interact with a local or remote ethereum node using HTTP, IPC or WebSocket (can also use ethers.js)
 - Chai and Mocha - the most advanced framework for testing smart contracts (can also use Waffle)
+- Polygon - solves common blockchain pain points, offering low gas fees and high speeds without sacrificing security. For local tests is using  Polygon Mumbai
+- Infura - runs ethereum nodes and provides access to them via api to eliminate the need to run and update your own infrastructure
+-IPFS - a peer-to-peer hypermedia protocol
+designed to preserve and grow humanity's knowledge
+by making the web upgradeable, resilient, and more open
+- React - is an open-source JavaScript framework, designed for building apps on multiple platforms like iOS, Android, and also web applications, utilizing the very same code base. It is based on React, and it brings all its glory to mobile app development.
+- Tailwind - a utility-first CSS framework packed with classes like flex, pt-4, text-center and rotate-90 that can be composed to build any design, directly in your markup
 
+----
 
-# Running 
+## High level diagram
+
+## Use cases & Usage Scenarios
+
+### Token
+
+### NFT
+
+### Vendor
+
+### UserRegistration
+
+#### Usage Scenarios 
+#### Governance can
+
+### KPMarket
+
+#### Usage Scenarios 
+#### Governance can
+
+### Auction
+
+#### Usage Scenarios 
+#### Governance can
+
+### AuctionFactory
+
+#### Usage Scenarios 
+#### Governance can
+
+---
+
+## Events
+
+---
+
+## Sequence diagrams
+
+---
+
+## Third party library
+The smart contracts inherit next SC from the openzeppelin libraries:
+
+```Ownable.sol``` - access control
+
+```ReentrancyGuard.sol``` - reentrancy guard pattern
+
+```SafeMath.sol``` - to prevent ower/under flows
+
+```Address.sol``` - to work with address types
+
+```Counters.sol``` - 
+
+--- 
+
+## Running 
 To run project you shold install this
 ```shell
 https://hardhat.org/getting-started/
@@ -45,13 +111,6 @@ or
 ```shell
 npm run build
 npm run start
-```
-
-# Use stack
-
-```shell
- 1. Polygon blockchain (Polygon Mumbai)
- 2. Infura (should be created a new project on Ethereum)
 ```
 
 # UI Interface
