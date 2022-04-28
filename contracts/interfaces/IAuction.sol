@@ -35,6 +35,10 @@ interface IAuction {
      * @param ENDED When the auction time is over
      * @param DIRECT_BUY When tokens are withdraw after the auction is over
      **/
+    // 0 - OPEN
+    // 1 - CANCELLED
+    // 2 - ENDED
+    // 3 - DIRECT_BUY
     enum AuctionState {
         OPEN,
         CANCELLED,

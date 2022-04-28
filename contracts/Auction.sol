@@ -94,7 +94,7 @@ contract Auction is IAuction, ReentrancyGuard {
         );
         require(
             msg.value >= startPrice,
-            "Auction: the bid must be greater than the start price"
+            "Auction: the bid must be greater than the started price"
         );
         require(
             msg.value > maxBid + minIncrement,
@@ -112,8 +112,7 @@ contract Auction is IAuction, ReentrancyGuard {
 
         bids.push(Bid(msg.sender, msg.value));
 
-        if (lastHighestBid != 0) {
-            // address(uint160(lastHightestBidder)).transfer(lastHighestBid); 
+        if (lastHighestBid != 0) { 
             // refund the previous bid to the previous highest bidder
             (bool success, ) = payable(lastHightestBidder).call{
                 value: lastHighestBid
