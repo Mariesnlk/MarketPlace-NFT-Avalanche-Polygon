@@ -19,7 +19,7 @@ describe("AuctionFactory", () => {
     let auctionFactoryAddress;
 
     let listingPrice;
-    let endTime;
+    let duration;
     let minIncrement;
     let directBuyPrice;
     let startPrice;
@@ -45,6 +45,14 @@ describe("AuctionFactory", () => {
         auctionFactory = await AuctionFactory.deploy();
         auctionFactoryAddress = auctionFactory.address;
 
+        auctionFactory.setMinAuctionDuration(60 * 60 * 5);
+
+    });
+
+    it('Set minAuctionDuration', async () => {
+        await expect(auctionFactory.setMinAuctionDuration(0))
+            .to.be.revertedWith("AuctionFactory: invalid min auction duration");
+
     });
 
     describe('Intercat with auction factory', async () => {
@@ -52,37 +60,7 @@ describe("AuctionFactory", () => {
             it('Should reverted if auction time less than 5 min', async () => {
                 await nft.connect(auctionOwner).mintToken('https-p1');
 
-                let blockNumBefore = await ethers.provider.getBlockNumber();
-                let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-                let timestampBefore = blockBefore.timestamp;
-                endTime = timestampBefore + 60 * 60 * 24; // 1 day
-                minIncrement = ethers.utils.parseUnits('0.002', 'ether');
-                directBuyPrice = ethers.utils.parseUnits('5', 'ether');
-                startPrice = ethers.utils.parseUnits('0.02', 'ether');
-                nftAddress = nftContractAddress;
-                tokenId = 1;
-
-                await nft.connect(auctionOwner).approve(auctionFactoryAddress, 1);
-
-                // await expect(auctionFactory.connect(auctionOwner).createAuction(
-                //     endTime,
-                //     minIncrement,
-                //     directBuyPrice,
-                //     startPrice,
-                //     nftAddress,
-                //     tokenId
-                // ))
-                //     .to.be.revertedWith("Auction: end time must be greater than 5 minutes");
-
-            });
-
-            it('Should reverted if finish time of auction less than current time', async () => {
-                await nft.connect(auctionOwner).mintToken('https-p1');
-
-                let blockNumBefore = await ethers.provider.getBlockNumber();
-                let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-                let timestampBefore = blockBefore.timestamp;
-                endTime = timestampBefore;
+                duration = 60 * 60;
                 minIncrement = ethers.utils.parseUnits('0.002', 'ether');
                 directBuyPrice = ethers.utils.parseUnits('5', 'ether');
                 startPrice = ethers.utils.parseUnits('0.02', 'ether');
@@ -92,24 +70,21 @@ describe("AuctionFactory", () => {
                 await nft.connect(auctionOwner).approve(auctionFactoryAddress, 1);
 
                 await expect(auctionFactory.connect(auctionOwner).createAuction(
-                    endTime,
+                    duration,
                     minIncrement,
                     directBuyPrice,
                     startPrice,
                     nftAddress,
                     tokenId
                 ))
-                    .to.be.revertedWith("Auction: finish time of auction cannot be less than current time");
+                    .to.be.revertedWith("Auction: invalid auction duration");
 
             });
 
             it('Should reverted if min increment for bid annot be less than 0', async () => {
                 await nft.connect(auctionOwner).mintToken('https-p1');
 
-                let blockNumBefore = await ethers.provider.getBlockNumber();
-                let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-                let timestampBefore = blockBefore.timestamp;
-                endTime = timestampBefore + 60 * 60 * 24; // 1 day
+                duration = 60 * 60 * 10; // 10 min
                 minIncrement = ethers.utils.parseUnits('0.002', 'ether');
                 directBuyPrice = ethers.utils.parseUnits('5', 'ether');
                 startPrice = ethers.utils.parseUnits('0.02', 'ether');
@@ -124,7 +99,7 @@ describe("AuctionFactory", () => {
                 endTime = timestampBefore + 60 * 60 * 24; // 1 day
 
                 await expect(auctionFactory.connect(auctionOwner).createAuction(
-                    endTime,
+                    duration,
                     ethers.utils.parseUnits('0', 'ether'),
                     directBuyPrice,
                     startPrice,
@@ -138,10 +113,7 @@ describe("AuctionFactory", () => {
             it('Should reverted if buy price less than 0', async () => {
                 await nft.connect(auctionOwner).mintToken('https-p1');
 
-                let blockNumBefore = await ethers.provider.getBlockNumber();
-                let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-                let timestampBefore = blockBefore.timestamp;
-                endTime = timestampBefore + 60 * 60 * 24; // 1 day
+                duration = 60 * 60 * 10; // 10 min
                 minIncrement = ethers.utils.parseUnits('0.002', 'ether');
                 directBuyPrice = ethers.utils.parseUnits('5', 'ether');
                 startPrice = ethers.utils.parseUnits('0.02', 'ether');
@@ -156,7 +128,7 @@ describe("AuctionFactory", () => {
                 endTime = timestampBefore + 60 * 60 * 24; // 1 day
 
                 await expect(auctionFactory.connect(auctionOwner).createAuction(
-                    endTime,
+                    duration,
                     minIncrement,
                     ethers.utils.parseUnits('0', 'ether'),
                     startPrice,
@@ -170,10 +142,7 @@ describe("AuctionFactory", () => {
             it('Should reverted if start price is smaller than direct buy price', async () => {
                 await nft.connect(auctionOwner).mintToken('https-p1');
 
-                let blockNumBefore = await ethers.provider.getBlockNumber();
-                let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-                let timestampBefore = blockBefore.timestamp;
-                endTime = timestampBefore + 60 * 60 * 24; // 1 day
+                duration = 60 * 60 * 10; // 10 min
                 minIncrement = ethers.utils.parseUnits('0.002', 'ether');
                 directBuyPrice = ethers.utils.parseUnits('5', 'ether');
                 startPrice = ethers.utils.parseUnits('0.02', 'ether');
@@ -188,7 +157,7 @@ describe("AuctionFactory", () => {
                 endTime = timestampBefore + 60 * 60 * 24; // 1 day
 
                 await expect(auctionFactory.connect(auctionOwner).createAuction(
-                    endTime,
+                    duration,
                     minIncrement,
                     directBuyPrice,
                     ethers.utils.parseUnits('5', 'ether'),
@@ -202,10 +171,7 @@ describe("AuctionFactory", () => {
             it('Should reverted if NFT address cannot be ZERO_ADDRESS ', async () => {
                 await nft.connect(auctionOwner).mintToken('https-p1');
 
-                let blockNumBefore = await ethers.provider.getBlockNumber();
-                let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-                let timestampBefore = blockBefore.timestamp;
-                endTime = timestampBefore + 60 * 60 * 24; // 1 day
+                duration = 60 * 60 * 10; // 10 min
                 minIncrement = ethers.utils.parseUnits('0.002', 'ether');
                 directBuyPrice = ethers.utils.parseUnits('5', 'ether');
                 startPrice = ethers.utils.parseUnits('0.02', 'ether');
@@ -220,7 +186,7 @@ describe("AuctionFactory", () => {
                 endTime = timestampBefore + 60 * 60 * 24; // 1 day
 
                 await expect(auctionFactory.connect(auctionOwner).createAuction(
-                    endTime,
+                    duration,
                     minIncrement,
                     directBuyPrice,
                     startPrice,
@@ -234,10 +200,7 @@ describe("AuctionFactory", () => {
             it('Should reverted if token id cannot is less than 0', async () => {
                 await nft.connect(auctionOwner).mintToken('https-p1');
 
-                let blockNumBefore = await ethers.provider.getBlockNumber();
-                let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-                let timestampBefore = blockBefore.timestamp;
-                endTime = timestampBefore + 60 * 60 * 24; // 1 day
+                duration = 60 * 60 * 10; // 10 min
                 minIncrement = ethers.utils.parseUnits('0.002', 'ether');
                 directBuyPrice = ethers.utils.parseUnits('5', 'ether');
                 startPrice = ethers.utils.parseUnits('0.02', 'ether');
@@ -252,7 +215,7 @@ describe("AuctionFactory", () => {
                 endTime = timestampBefore + 60 * 60 * 24; // 1 day
 
                 await expect(auctionFactory.connect(auctionOwner).createAuction(
-                    endTime,
+                    duration,
                     minIncrement,
                     directBuyPrice,
                     startPrice,
@@ -263,13 +226,10 @@ describe("AuctionFactory", () => {
 
             });
 
-            it('Should sucessfully create auction', async () => {
+            it('Should sucessfully create the auction', async () => {
                 await nft.connect(auctionOwner).mintToken('https-p1');
 
-                let blockNumBefore = await ethers.provider.getBlockNumber();
-                let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-                let timestampBefore = blockBefore.timestamp;
-                endTime = timestampBefore + 60 * 60 * 24; // 1 day
+                duration = 60 * 60 * 10; // 10 min
                 minIncrement = ethers.utils.parseUnits('0.002', 'ether');
                 directBuyPrice = ethers.utils.parseUnits('5', 'ether');
                 startPrice = ethers.utils.parseUnits('0.02', 'ether');
@@ -283,7 +243,7 @@ describe("AuctionFactory", () => {
                 currentTime = blockBefore.timestamp + 1;
 
                 await expect(auctionFactory.connect(auctionOwner).createAuction(
-                    endTime,
+                    duration,
                     minIncrement,
                     directBuyPrice,
                     startPrice,
@@ -293,23 +253,19 @@ describe("AuctionFactory", () => {
                     .to.emit(auctionFactory, 'CreatedAuction')
                     .withArgs(auctionOwner.address,
                         currentTime,
-                        endTime,
+                        duration,
                         ethers.utils.parseUnits('0.002', 'ether'),
                         ethers.utils.parseUnits('5', 'ether'),
                         ethers.utils.parseUnits('0.02', 'ether'),
                         nftContractAddress,
                         1);
-
             });
 
         });
 
         describe('getAuctions', async () => {
             it('Should successfully get auctions', async () => {
-                let blockNumBefore = await ethers.provider.getBlockNumber();
-                let blockBefore = await ethers.provider.getBlock(blockNumBefore);
-                let timestampBefore = blockBefore.timestamp;
-                endTime = timestampBefore + 60 * 60 * 24; // 1 day
+                duration = 60 * 60 * 10; // 10 min
                 minIncrement = ethers.utils.parseUnits('0.002', 'ether');
                 directBuyPrice = ethers.utils.parseUnits('5', 'ether');
                 startPrice = ethers.utils.parseUnits('0.02', 'ether');
@@ -319,7 +275,7 @@ describe("AuctionFactory", () => {
                 tokenId = 1;
                 await nft.connect(auctionOwner).approve(auctionFactoryAddress, 1);
                 await auctionFactory.connect(auctionOwner).createAuction(
-                    endTime,
+                    duration,
                     minIncrement,
                     directBuyPrice,
                     startPrice,
@@ -346,10 +302,81 @@ describe("AuctionFactory", () => {
 
         });
 
-        // describe('Should place bids to the auction', async () => {
-        //     it('Should place bids to the auction', async () => {
-        //     });
-        // });
+        describe('deletAuction', async () => {
+            it('Reverted if the auction is already deleted', async () => {
+                await nft.connect(auctionOwner).mintToken('https-p1');
+
+                duration = 60 * 60 * 10; // 10 min
+                minIncrement = ethers.utils.parseUnits('0.002', 'ether');
+                directBuyPrice = ethers.utils.parseUnits('5', 'ether');
+                startPrice = ethers.utils.parseUnits('0.02', 'ether');
+                nftAddress = nftContractAddress;
+                tokenId = 1;
+
+                await nft.connect(auctionOwner).approve(auctionFactoryAddress, 1);
+
+                blockNumBefore = await ethers.provider.getBlockNumber();
+                blockBefore = await ethers.provider.getBlock(blockNumBefore);
+                currentTime = blockBefore.timestamp + 1;
+
+                await auctionFactory.connect(auctionOwner).createAuction(
+                    duration,
+                    minIncrement,
+                    directBuyPrice,
+                    startPrice,
+                    nftAddress,
+                    tokenId
+                );
+
+                await auctionFactory.connect(auctionOwner).deleteAuction(0);
+                expect(await auctionFactory.auctions(0)).to.be.equal(constants.ZERO_ADDRESS);
+
+                await expect(auctionFactory.connect(auctionOwner).deleteAuction(0))
+                    .to.be.revertedWith("ALREADY_DELETED");
+            });
+
+            it.only('Sucessfully deleted the auction', async () => {
+                await nft.connect(auctionOwner).mintToken('https-p1');
+
+                duration = 60 * 60 * 10; // 10 min
+                minIncrement = ethers.utils.parseUnits('0.002', 'ether');
+                directBuyPrice = ethers.utils.parseUnits('5', 'ether');
+                startPrice = ethers.utils.parseUnits('0.02', 'ether');
+                nftAddress = nftContractAddress;
+                tokenId = 1;
+
+                await nft.connect(auctionOwner).approve(auctionFactoryAddress, 1);
+
+                blockNumBefore = await ethers.provider.getBlockNumber();
+                blockBefore = await ethers.provider.getBlock(blockNumBefore);
+                currentTime = blockBefore.timestamp + 1;
+
+                await auctionFactory.connect(auctionOwner).createAuction(
+                    duration,
+                    minIncrement,
+                    directBuyPrice,
+                    startPrice,
+                    nftAddress,
+                    tokenId
+                );
+
+                const [auctionAddress, isExist] = await auctionFactory.auctionsInfo(0);
+
+                expect(await nft.ownerOf(tokenId)).to.be.equal(auctionAddress);
+
+                // need to appove
+                await nft.connect(auctionAddress).approve(auctionOwner.address, 1);
+                expect(await auctionFactory.connect(auctionOwner).deleteAuction(0))
+                    .to.emit(auctionFactory, 'AuctionCancelled');
+
+                expect(await auctionFactory.auctions(0)).to.be.equal(constants.ZERO_ADDRESS);
+                // not changed nft owner
+                expect(await nft.ownerOf(tokenId)).to.be.equal(auctionOwner.address);
+
+            });
+
+
+        });
 
     });
 

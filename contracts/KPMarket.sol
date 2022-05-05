@@ -25,7 +25,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
     //// TODO ERC2981: add implementation of the royalty standard, and the respective extensions for ERC721 and ERC1155
 
     /**
-     * @dev set address to NFT contract
+     * @notice set address to NFT contract
      */
     function setNFTContract(address _nftContract) external onlyOwner {
         require(
@@ -36,8 +36,8 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev set new value for listing price
-     * @notice only owner can update
+     * @notice set new value for listing price
+     * @dev only owner can update
      */
     function updateListingPrice(uint256 _listingPrice)
         external
@@ -52,10 +52,10 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev add NFT to market
+     * @notice add NFT to market
      * @param nftId id of the NFT
      * @param price price to sell
-     * @notice function to put item up for sale
+     * @dev function to put item up for sale
      */
     function createMarketNFT(uint256 nftId, uint256 price)
         external
@@ -103,10 +103,10 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev reselle NFT
+     * @notice reselle NFT
      * @param nftId id of the NFT
      * @param price to resell
-     * @notice only NFT owner can resalle
+     * @dev only NFT owner can resalle
      */
     function reselleNFT(uint256 nftId, uint256 price)
         external
@@ -136,7 +136,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev create selling of the NFT (user buy it)
+     * @notice create selling of the NFT (user buy it)
      * @param nftId id of the NFT
      */
     function marketSaleNFT(uint256 nftId)
@@ -175,8 +175,8 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev get info list of unsoled NFT
-     * @notice fetchMarketTokens
+     * @notice get info list of unsoled NFT
+     * @dev fetchMarketTokens
      */
     function getUnsoldNFTs()
         external
@@ -204,8 +204,8 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev get info list of NFT that owns msg.sender
-     * @notice fetchMyNFTs
+     * @notice get info list of NFT that owns msg.sender
+     * @dev fetchMyNFTs
      */
     function getMyNFTs() external view override returns (MarketNFT[] memory) {
         uint256 totalNFTCount = tokenIds.current();
@@ -234,8 +234,8 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev get info list of NFT that only added to market
-     * @notice fetchItemsCreated
+     * @notice get info list of NFT that only added to market
+     * @dev fetchItemsCreated
      */
     function getOnlyCreatedNFTs()
         external

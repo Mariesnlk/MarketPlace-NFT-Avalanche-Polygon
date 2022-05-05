@@ -20,9 +20,9 @@ contract AuctionFactory is IAuctionFactory, Ownable {
     mapping(uint256 => AuctionInfo) public auctionsInfo;
 
     /**
-     * @dev set new minumum value of the auction duration
+     * @notice set new minumum value of the auction duration
      * @param auctionDuration minumum value of the auction duration
-     * @notice only owner can set
+     * @dev only owner can set
      */
     function setMinAuctionDuration(uint256 auctionDuration) external onlyOwner {
         require(
@@ -33,8 +33,8 @@ contract AuctionFactory is IAuctionFactory, Ownable {
     }
 
     /**
-     * @dev creating auction
-     * @param _endTime timestamp when the auction will be finished
+     * @notice creating auction
+     * @param _duration timestamp when the auction will be finished
      * @param _minIncrement the minimum increment for the bid
      * @param _directBuyPrice the price for a direct buy
      * @param _startPrice the starting price for the auction
@@ -42,7 +42,7 @@ contract AuctionFactory is IAuctionFactory, Ownable {
      * @param _tokenId the id of the token
      **/
     function createAuction(
-        uint256 _endTime,
+        uint256 _duration,
         uint256 _minIncrement,
         uint256 _directBuyPrice,
         uint256 _startPrice,
@@ -50,14 +50,14 @@ contract AuctionFactory is IAuctionFactory, Ownable {
         uint256 _tokenId
     ) external override returns (bool) {
         require(
-            _endTime >= minAuctionDuration,
+            _duration >= minAuctionDuration,
             "Auction: invalid auction duration"
         );
         uint256 auctionId = auctionIds.current();
         auctionIds.increment();
         Auction auction = new Auction(
             msg.sender,
-            _endTime,
+            _duration,
             _minIncrement,
             _directBuyPrice,
             _startPrice,
@@ -74,7 +74,7 @@ contract AuctionFactory is IAuctionFactory, Ownable {
         emit CreatedAuction(
             msg.sender,
             block.timestamp,
-            _endTime,
+            _duration,
             _minIncrement,
             _directBuyPrice,
             _startPrice,
@@ -86,17 +86,25 @@ contract AuctionFactory is IAuctionFactory, Ownable {
     }
 
     /**
-     * @dev deleting auction
-     * @notice only owner of the auction can delete
+     * @notice deleting auction
+     * @dev only owner of the auction can delete
      * @param auctionId address of the auction that will be deleted
      **/
     function deleteAuction(uint256 auctionId) external override returns (bool) {
         require(
             auctionsInfo[auctionId].isExists,
-            "AuctionFactory: the auction is deleted"
+            "ALREADY_DELETED"
         );
 
-        IAuction(auctionsInfo[auctionId].auction).cancelAuction();
+        address auctionAddress = auctionsInfo[auctionId].auction;
+
+        (bool success, bytes memory result) = auctionAddress.delegatecall(
+            abi.encodeWithSignature("cancelAuction()")
+        );
+
+        require(!success, "FAILED_DELEDATECALL");
+
+        // IAuction(auctionsInfo[auctionId].auction).cancelAuction();
 
         delete auctionsInfo[auctionId];
         delete auctions[auctionId];
@@ -105,7 +113,7 @@ contract AuctionFactory is IAuctionFactory, Ownable {
     }
 
     /**
-     * @dev get a list of all auctions
+     * @notice get a list of all auctions
      */
     function getAuctions()
         external
@@ -122,7 +130,7 @@ contract AuctionFactory is IAuctionFactory, Ownable {
     }
 
     /**
-     * @dev get the information of each auction address
+     * @notice get the information of each auction address
      */
     function getAuctionsInfo(address[] calldata _auctionsList)
         external
@@ -153,9 +161,7 @@ contract AuctionFactory is IAuctionFactory, Ownable {
             tokenIds[i] = Auction(auctions[i]).tokenId();
             endTime[i] = Auction(auctions[i]).endTime();
             startPrice[i] = Auction(auctions[i]).startPrice();
-            auctionState[i] = uint256(
-                Auction(auctions[i]).getAuctionState()
-            );
+            auctionState[i] = uint256(Auction(auctions[i]).getAuctionState());
         }
 
         return (

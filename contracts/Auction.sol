@@ -36,7 +36,7 @@ contract Auction is IAuction, ReentrancyGuard {
 
     constructor(
         address _creator,
-        uint256 _endTime,
+        uint256 _duration,
         uint256 _minIncrement,
         uint256 _directBuyPrice,
         uint256 _startPrice,
@@ -46,10 +46,6 @@ contract Auction is IAuction, ReentrancyGuard {
         require(
             msg.sender != address(0),
             "Auction: Creator of the auction can't be zero address"
-        );
-        require(
-            _endTime > block.timestamp,
-            "Auction: finish time of auction cannot be less than current time"
         );
         require(
             _minIncrement > 0,
@@ -71,7 +67,7 @@ contract Auction is IAuction, ReentrancyGuard {
 
         creator = _creator;
         startTime = block.timestamp;
-        endTime = startTime + _endTime;
+        endTime = startTime + _duration;
         minIncrement = _minIncrement;
         directBuyPrice = _directBuyPrice;
         startPrice = _startPrice;
@@ -81,7 +77,7 @@ contract Auction is IAuction, ReentrancyGuard {
     }
 
     /**
-     * @dev Place a bid on the auction
+     * @notice Place a bid on the auction
      **/
     function placeBid() external payable override nonReentrant returns (bool) {
         require(
@@ -112,7 +108,7 @@ contract Auction is IAuction, ReentrancyGuard {
 
         bids.push(Bid(msg.sender, msg.value));
 
-        if (lastHighestBid != 0) { 
+        if (lastHighestBid != 0) {
             // refund the previous bid to the previous highest bidder
             (bool success, ) = payable(lastHightestBidder).call{
                 value: lastHighestBid
@@ -126,7 +122,7 @@ contract Auction is IAuction, ReentrancyGuard {
     }
 
     /**
-     * @dev Withdraw the token after the auction is over
+     * @notice Withdraw the token after the auction is over
      **/
     function withdrawToken() external override {
         require(
@@ -145,7 +141,7 @@ contract Auction is IAuction, ReentrancyGuard {
     }
 
     /**
-     * @dev Withdraw the funds after the auction is over
+     * @notice Withdraw the funds after the auction is over
      **/
     function withdrawFunds() external override nonReentrant {
         require(
@@ -165,7 +161,7 @@ contract Auction is IAuction, ReentrancyGuard {
     }
 
     /**
-     * @dev Cancel the auction
+     * @notice Cancel the auction
      **/
     function cancelAuction() external override returns (bool) {
         require(
@@ -192,7 +188,7 @@ contract Auction is IAuction, ReentrancyGuard {
     }
 
     /**
-     * @dev Get a list of all bids and addresses
+     * @notice Get a list of all bids and addresses
      **/
     function allBids()
         external
@@ -210,7 +206,7 @@ contract Auction is IAuction, ReentrancyGuard {
     }
 
     /**
-     * @dev Get the auction state
+     * @notice Get the auction state
      **/
     function getAuctionState() public view override returns (AuctionState) {
         if (isCancelled) {

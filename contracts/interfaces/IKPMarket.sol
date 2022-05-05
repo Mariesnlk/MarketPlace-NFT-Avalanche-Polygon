@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 /// @title Define interface for Market contract
 interface IKPMarket {
     /**
-     * @dev emitted when nft is added to market
+     * @notice emitted when nft is added to market
      * @param id id
      * @param nftContract address of the nft contract
      * @param tokenId nft token
@@ -26,7 +26,7 @@ interface IKPMarket {
     );
 
     /**
-     * @dev mft token added to the market info
+     * @notice mft token added to the market info
      * @param id id
      * @param nftContract address of the nft contract
      * @param tokenId nft token
@@ -48,7 +48,7 @@ interface IKPMarket {
     }
 
     /**
-     * @dev add NFT to market
+     * @notice add NFT to market
      * @param nftId id of the NFT
      * @param price price to sell
      */
@@ -58,16 +58,16 @@ interface IKPMarket {
         returns (bool);
 
     /**
-     * @dev create selling of the NFT (user buy it)
+     * @notice create selling of the NFT (user buy it)
      * @param nftId id of the NFT
      */
     function marketSaleNFT(uint256 nftId) external payable returns (bool);
 
     /**
-     * @dev reselle NFT
+     * @notice reselle NFT
      * @param nftId id of the NFT
      * @param price to resell
-     * @notice only NFT owner can resalle
+     * @dev only NFT owner can resalle
      */
     function reselleNFT(uint256 nftId, uint256 price)
         external
@@ -75,20 +75,20 @@ interface IKPMarket {
         returns (bool);
 
     /**
-     * @dev get info list of unsoled NFT
-     * @notice fetchMarketTokens
+     * @notice get info list of unsoled NFT
+     * @dev fetchMarketTokens
      */
     function getUnsoldNFTs() external view returns (MarketNFT[] memory);
 
     /**
-     * @dev get info list of NFT that owns msg.sender
-     * @notice fetchMyNFTs
+     * @notice get info list of NFT that owns msg.sender
+     * @dev fetchMyNFTs
      */
     function getMyNFTs() external view returns (MarketNFT[] memory);
 
     /**
-     * @dev get info list of NFT that only added to market
-     * @notice fetchItemsCreated
+     * @notice get info list of NFT that only added to market
+     * @dev fetchItemsCreated
      */
     function getOnlyCreatedNFTs() external view returns (MarketNFT[] memory);
 }

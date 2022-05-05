@@ -4,32 +4,32 @@ pragma solidity ^0.8.9;
 /// @title Define interface for Auction contract
 interface IAuction {
     /**
-     * @dev emitted when a new bid was placed
+     * @notice emitted when a new bid was placed
      * @param bidder address of user who bids
      * @param bid the value that user bid for auction
      **/
     event NewBid(address indexed bidder, uint256 bid);
 
     /**
-     * @dev emitted when an auction winner withdrawed the token
+     * @notice emitted when an auction winner withdrawed the token
      * @param withdrawer address that withdraw all tokens after auction
      **/
     event WithdrawToken(address indexed withdrawer);
 
     /**
-     * @dev emitted when the auction owner withdrawed the funds
+     * @notice emitted when the auction owner withdrawed the funds
      * @param withdrawer address that withdraw the funds after auction
      * @param amount value that withdraw by auction`s owner
      **/
     event WithdrawFunds(address indexed withdrawer, uint256 amount);
 
     /**
-     * @dev emitted when the auctionis canselled
+     * @notice emitted when the auctionis canselled
      **/
     event AuctionCancelled();
 
     /**
-     * @dev List of available states of auction
+     * @notice List of available states of auction
      * @param OPEN When the owner of the auction creates it
      * @param CANCELLED When the owner of the auction cancels it
      * @param ENDED When the auction time is over
@@ -47,7 +47,7 @@ interface IAuction {
     }
 
     /**
-     * @dev Struct of a bid
+     * @notice Struct of a bid
      * @param sender address who passes a bid
      * @param bid amount that is passed
      **/
@@ -57,27 +57,27 @@ interface IAuction {
     }
 
     /**
-     * @dev Place a bid on the auction
+     * @notice Place a bid on the auction
      **/
     function placeBid() external payable returns (bool);
 
     /**
-     * @dev Withdraw the token after the auction is over
+     * @notice Withdraw the token after the auction is over
      **/
     function withdrawToken() external;
 
     /**
-     * @dev Withdraw the funds after the auction is over
+     * @notice Withdraw the funds after the auction is over
      **/
     function withdrawFunds() external;
 
     /**
-     * @dev Cancel the auction
+     * @notice Cancel the auction
      **/
     function cancelAuction() external returns (bool);
 
     /**
-     * @dev Get a list of all bids and addresses
+     * @notice Get a list of all bids and addresses
      **/
     function allBids()
         external
@@ -85,7 +85,7 @@ interface IAuction {
         returns (address[] memory, uint256[] memory);
 
     /**
-     * @dev Get the auction state
+     * @notice Get the auction state
      **/
     function getAuctionState() external view returns (AuctionState);
 }

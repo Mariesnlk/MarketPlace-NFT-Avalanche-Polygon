@@ -12,7 +12,7 @@ contract NFT is ERC721URIStorage {
     /// @notice market contract address
     address private market;
     /**
-     * @dev emitted when NFT is minted
+     * @notice emitted when NFT is minted
      * @param minter address of creater
      * @param tokenURI nft url
      * @param nftId nft id

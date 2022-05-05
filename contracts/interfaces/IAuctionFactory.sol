@@ -4,10 +4,10 @@ pragma solidity ^0.8.9;
 /// @title Define interface for AuctionFactory contract
 interface IAuctionFactory {
     /**
-     * @dev emitted when an auction is created
+     * @notice emitted when an auction is created
      * @param creator address of user who bids
      * @param startTime timestamp when the auction will be started
-     * @param endTime timestamp when the auction will be finished
+     * @param duration timestamp how much the auction will be
      * @param minIncrement the minimum increment for the bid
      * @param directBuyPrice the price for a direct buy
      * @param startPrice the starting price for the auction
@@ -17,7 +17,7 @@ interface IAuctionFactory {
     event CreatedAuction(
         address indexed creator,
         uint256 startTime,
-        uint256 endTime,
+        uint256 duration,
         uint256 minIncrement,
         uint256 directBuyPrice,
         uint256 startPrice,
@@ -26,7 +26,7 @@ interface IAuctionFactory {
     );
 
     /**
-     * @dev struct of auction address and value if exists it or not
+     * @notice struct of auction address and value if exists it or not
      * @param auction auction address
      * @param isExists is deleted auction
      **/
@@ -36,8 +36,8 @@ interface IAuctionFactory {
     }
 
     /**
-     * @dev creating auction
-     * @param _endTime timestamp when the auction will be finished
+     * @notice creating auction
+     * @param _duration timestamp when the auction will be finished
      * @param _minIncrement the minimum increment for the bid
      * @param _directBuyPrice the price for a direct buy
      * @param _startPrice the starting price for the auction
@@ -45,7 +45,7 @@ interface IAuctionFactory {
      * @param _tokenId the id of the token
      **/
     function createAuction(
-        uint256 _endTime,
+        uint256 _duration,
         uint256 _minIncrement,
         uint256 _directBuyPrice,
         uint256 _startPrice,
@@ -54,19 +54,19 @@ interface IAuctionFactory {
     ) external returns (bool);
 
     /**
-     * @dev deleting auction
-     * @notice only owner of the auction can delete
+     * @notice deleting auction
+     * @dev only owner of the auction can delete
      * @param auctionId address of the auction that will be deleted
      **/
     function deleteAuction(uint256 auctionId) external returns (bool);
 
     /**
-     * @dev get a list of all auctions
+     * @notice get a list of all auctions
      */
     function getAuctions() external view returns (address[] memory _auctions);
 
     /**
-     * @dev get the information of each auction address
+     * @notice get the information of each auction address
      */
     function getAuctionsInfo(address[] calldata _auctionsList)
         external

@@ -20,9 +20,9 @@ contract Vendor is IVendor, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev get tokens by caller depending on how much wei was sent to contract
-     * @notice return tokens amount that buy msg.sender
-     * @notice before buy transfer tokens from owner to vendor contract address
+     * @notice get tokens by caller depending on how much wei was sent to contract
+     * @dev return tokens amount that buy msg.sender
+     * @dev before buy transfer tokens from owner to vendor contract address
      */
     function buyTokens()
         external
@@ -55,9 +55,9 @@ contract Vendor is IVendor, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev transfer amount of tokens back to the contract
+     * @notice transfer amount of tokens back to the contract
      * @param _amount tokens amount that recipient wants to buy
-     * @notice approve vendor contract
+     * @dev approve vendor contract
      */
     function sellTokens(uint256 _amount) external override nonReentrant {
         require(
@@ -88,7 +88,7 @@ contract Vendor is IVendor, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev - set price in wei for buy tokens
+     * @notice - set price in wei for buy tokens
      * @param _price - token price
      * @return _newPrice - reurn new setted price
      */
@@ -107,7 +107,7 @@ contract Vendor is IVendor, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev allow the owner of the contract to withdraw eth
+     * @notice allow the owner of the contract to withdraw eth
      */
     function withdraw() external override onlyOwner {
         uint256 contractBalance = address(this).balance;
