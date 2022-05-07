@@ -27,7 +27,7 @@ describe("AuctionFactory", () => {
     let tokenId;
 
     beforeEach(async () => {
-        [creater, minter, buyer, auctionOwner, bidder1, bidder2, ...otherAccounts] = await ethers.getSigners();
+        [creater, minter, buyer, auctionOwner, bidder1, bidder2, bidder3, ...otherAccounts] = await ethers.getSigners();
 
         const Market = await ethers.getContractFactory('KPMarket');
         market = await Market.deploy();
@@ -335,7 +335,7 @@ describe("AuctionFactory", () => {
                     .to.be.revertedWith("ALREADY_DELETED");
             });
 
-            it.only('Sucessfully deleted the auction', async () => {
+            it('Sucessfully deleted the auction', async () => {
                 await nft.connect(auctionOwner).mintToken('https-p1');
 
                 duration = 60 * 60 * 10; // 10 min
@@ -365,16 +365,106 @@ describe("AuctionFactory", () => {
                 expect(await nft.ownerOf(tokenId)).to.be.equal(auctionAddress);
 
                 // need to appove
-                await nft.connect(auctionAddress).approve(auctionOwner.address, 1);
+                // await nft.connect(auctionAddress).approve(auctionOwner.address, 1);
                 expect(await auctionFactory.connect(auctionOwner).deleteAuction(0))
                     .to.emit(auctionFactory, 'AuctionCancelled');
 
                 expect(await auctionFactory.auctions(0)).to.be.equal(constants.ZERO_ADDRESS);
                 // not changed nft owner
-                expect(await nft.ownerOf(tokenId)).to.be.equal(auctionOwner.address);
+                // expect(await nft.ownerOf(tokenId)).to.be.equal(auctionOwner.address);
 
             });
+        });
 
+        describe('getAuctionsInfo', async () => {
+            it('get info about all auctions', async () => {
+                //first auction 
+                await nft.connect(auctionOwner).mintToken('https-p1');
+
+                duration = 60 * 60 * 10; // 10 min
+                minIncrement = ethers.utils.parseUnits('0.002', 'ether');
+                directBuyPrice = ethers.utils.parseUnits('5', 'ether');
+                startPrice = ethers.utils.parseUnits('0.02', 'ether');
+                nftAddress = nftContractAddress;
+                tokenId = 1;
+
+                await nft.connect(auctionOwner).approve(auctionFactoryAddress, 1);
+
+                blockNumBefore = await ethers.provider.getBlockNumber();
+                blockBefore = await ethers.provider.getBlock(blockNumBefore);
+                currentTime = blockBefore.timestamp + 1;
+
+                await auctionFactory.connect(auctionOwner).createAuction(
+                    duration,
+                    minIncrement,
+                    directBuyPrice,
+                    startPrice,
+                    nftAddress,
+                    tokenId
+                );
+
+                const [auctionAddress1, isExist] = await auctionFactory.auctionsInfo(0);
+
+                let Auction = await ethers.getContractFactory("Auction");
+                let auctionInstance = Auction.attach(
+                    auctionAddress1
+                );
+
+                await auctionInstance.connect(bidder1).placeBid(
+                    { value: ethers.utils.parseUnits('0.02', 'ether') }
+                );
+                await auctionInstance.connect(bidder2).placeBid(
+                    { value: ethers.utils.parseUnits('0.025', 'ether') }
+                );
+                await auctionInstance.connect(bidder1).placeBid(
+                    { value: ethers.utils.parseUnits('5.1', 'ether') }
+                );
+
+                //second auction
+                await nft.connect(auctionOwner).mintToken('https-p2');
+
+                tokenId = 2;
+
+                await nft.connect(auctionOwner).approve(auctionFactoryAddress, 2);
+
+                await auctionFactory.connect(auctionOwner).createAuction(
+                    duration,
+                    minIncrement,
+                    directBuyPrice,
+                    startPrice,
+                    nftAddress,
+                    tokenId
+                );
+
+                const [auctionAddress2, isExist1] = await auctionFactory.auctionsInfo(1);
+
+                Auction = await ethers.getContractFactory("Auction");
+                auctionInstance = Auction.attach(
+                    auctionAddress2
+                );
+
+                await auctionInstance.connect(bidder1).placeBid(
+                    { value: ethers.utils.parseUnits('0.05', 'ether') }
+                );
+                await auctionInstance.connect(bidder2).placeBid(
+                    { value: ethers.utils.parseUnits('0.09', 'ether') }
+                );
+                await auctionInstance.connect(bidder3).placeBid(
+                    { value: ethers.utils.parseUnits('0.2', 'ether') }
+                );
+                await auctionInstance.connect(bidder2).placeBid(
+                    { value: ethers.utils.parseUnits('0.3', 'ether') }
+                );
+
+                await ethers.provider.send("evm_increaseTime", [60 * 60 * 15]);
+                await ethers.provider.send("evm_mine");
+
+                expect(await auctionInstance.getAuctionState()).to.be.equal(2);
+
+                // get info about requested auctions
+                console.log(await auctionFactory.getAuctionsInfo([auctionAddress1, auctionAddress2]));
+
+            });
 
         });
 

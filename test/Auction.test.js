@@ -172,12 +172,42 @@ describe("AuctionFactory", () => {
         });
 
         describe('getAuctionState', async () => {
-            // it('CREATED -> ENDED', async () => {
-            //     expect(await auctionInstance.getAuctionState()).to.be.equal(0);
-            //     await ethers.provider.send("evm_increaseTime", [ONE_DAY * 7]);
-            //     await ethers.provider.send("evm_mine");
-            //     expect(await auctionInstance.getAuctionState()).to.be.equal(2);
-            // });
+            it('CREATED -> ENDED', async () => {
+                await nft.connect(auctionOwner).mintToken('https-p2');
+                duration = 60 * 60 * 10; // 10 min
+                minIncrement = ethers.utils.parseUnits('0.002', 'ether');
+                directBuyPrice = ethers.utils.parseUnits('5', 'ether');
+                startPrice = ethers.utils.parseUnits('0.02', 'ether');
+                nftAddress = nftContractAddress;
+                tokenId = 2;
+
+                await nft.connect(auctionOwner).approve(auctionFactoryAddress, 2);
+
+                await auctionFactory.connect(auctionOwner).createAuction(
+                    duration,
+                    minIncrement,
+                    directBuyPrice,
+                    startPrice,
+                    nftAddress,
+                    tokenId
+                );
+
+                const [auctionAddress2, isExist1] = await auctionFactory.auctionsInfo(1);
+
+                Auction = await ethers.getContractFactory("Auction");
+                auctionInstance = Auction.attach(
+                    auctionAddress2
+                );
+
+                await auctionInstance.connect(bidder1).placeBid(
+                    { value: ethers.utils.parseUnits('0.05', 'ether') }
+                );
+
+                expect(await auctionInstance.getAuctionState()).to.be.equal(0);
+                await ethers.provider.send("evm_increaseTime", [ONE_DAY * 15]);
+                await ethers.provider.send("evm_mine");
+                expect(await auctionInstance.getAuctionState()).to.be.equal(2);
+            });
 
             it('CREATED -> CANCELED', async () => {
                 expect(await auctionInstance.getAuctionState()).to.be.equal(0);
