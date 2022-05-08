@@ -21,6 +21,7 @@ interface IKPMarket {
         address creator,
         address owner,
         uint256 price,
+        uint256 priceInTokens,
         uint256 likes,
         bool sold
     );
@@ -43,6 +44,7 @@ interface IKPMarket {
         address creator;
         address owner;
         uint256 price;
+        uint256 priceInTokens;
         uint256 likes;
         bool sold;
     }
@@ -60,11 +62,12 @@ interface IKPMarket {
     /**
      * @notice create selling of the NFT (user buy it)
      * @param nftId id of the NFT
+     * @param tokens amount o MRSNLK tokens
      */
-    function marketSaleNFT(uint256 nftId) external payable returns (bool);
+    function marketSaleNFT(uint256 nftId, uint256 tokens) external payable returns (bool);
 
     /**
-     * @notice reselle NFT
+     * @notice reselle NFT to market
      * @param nftId id of the NFT
      * @param price to resell
      * @dev only NFT owner can resalle

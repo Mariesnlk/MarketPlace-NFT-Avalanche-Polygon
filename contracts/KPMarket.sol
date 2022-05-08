@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -17,12 +18,21 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
     Counters.Counter private tokenSold;
     /// @notice NFT contract
     IERC721 public nftContract;
+    /// @notice Token contract
+    IERC20 public token;
     /// @notice price that permit add nft to the market
     uint256 public listingPrice = 0.045 ether;
-    // tokenId return which MarketToken - fetch which one it is
+    /// @notice tokenId return which MarketToken - fetch which one it is
     mapping(uint256 => MarketNFT) public idToMarketToken;
+    /// @notice token price to 1 ETH
+    uint256 public TOKENS_PRICE = 50;
 
     //// TODO ERC2981: add implementation of the royalty standard, and the respective extensions for ERC721 and ERC1155
+
+    constructor(address _token) {
+        require(_token != address(0), "KPMarket: invalid token address");
+        token = IERC20(_token);
+    }
 
     /**
      * @notice set address to NFT contract
@@ -33,6 +43,15 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
             "KPMarket: invalid nftContract address"
         );
         nftContract = IERC721(_nftContract);
+    }
+
+    /**
+     * @notice set new price for ERC20 tokens
+     * @dev only contract owner can do
+     */
+    function setTokensPrice(uint256 _price) external onlyOwner {
+        require(_price > 0, "INVALD_VALUE");
+        TOKENS_PRICE = _price;
     }
 
     /**
@@ -72,6 +91,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
 
         tokenIds.increment();
         uint256 itemId = tokenIds.current();
+        uint256 priceInTokens = _calculatePriceInTokens(price);
 
         //putting nft up for sale
         idToMarketToken[itemId] = MarketNFT(
@@ -81,6 +101,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
             msg.sender,
             address(0),
             price,
+            priceInTokens,
             0,
             false
         );
@@ -95,6 +116,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
             msg.sender,
             address(0),
             price,
+            priceInTokens,
             0,
             false
         );
@@ -103,7 +125,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @notice reselle NFT
+     * @notice reselle NFT by ETH or by ERC20 tokens
      * @param nftId id of the NFT
      * @param price to resell
      * @dev only NFT owner can resalle
@@ -136,10 +158,11 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @notice create selling of the NFT (user buy it)
+     * @notice create selling of the NFT (user buy it) to market
      * @param nftId id of the NFT
+     * @param tokens amount o MRSNLK tokens
      */
-    function marketSaleNFT(uint256 nftId)
+    function marketSaleNFT(uint256 nftId, uint256 tokens)
         external
         payable
         override
@@ -148,17 +171,24 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
     {
         uint256 price = idToMarketToken[nftId].price;
         uint256 tokenId = idToMarketToken[nftId].tokenId;
+        address creator = idToMarketToken[nftId].creator;
 
         require(
             msg.value == price,
             "KPMarket: please submit the asking price in order to continue"
         );
 
-        // idToMarketToken[nftId].creator.transfer(msg.value);
-        (bool success, ) = payable(idToMarketToken[nftId].creator).call{
-            value: msg.value
-        }("");
-        require(success, "Failed to transfer Ether");
+        // payable(owner).transfer(listingPrice);
+        (bool result, ) = payable(msg.sender).call{value: listingPrice}("");
+        require(result, "Failed to transfer Ether");
+
+        if (tokens > 0) {
+            token.transfer(creator, tokens);
+        } else {
+            // idToMarketToken[nftId].creator.transfer(msg.value);
+            (bool success, ) = payable(creator).call{value: msg.value}("");
+            require(success, "Failed to transfer Ether");
+        }
 
         nftContract.transferFrom(address(this), msg.sender, tokenId);
 
@@ -166,10 +196,6 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
         idToMarketToken[nftId].sold = true;
 
         tokenSold.increment();
-
-        // payable(owner).transfer(listingPrice);
-        (bool result, ) = payable(msg.sender).call{value: listingPrice}("");
-        require(result, "Failed to transfer Ether");
 
         return true;
     }
@@ -265,5 +291,13 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
         }
 
         return items;
+    }
+
+    function _calculatePriceInTokens(uint256 _price)
+        internal
+        view
+        returns (uint256)
+    {
+        return _price * TOKENS_PRICE;
     }
 }

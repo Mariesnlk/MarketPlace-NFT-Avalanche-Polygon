@@ -25,11 +25,19 @@ describe("AuctionFactory", () => {
 
     let ONE_DAY = 60 * 60 * 24;
 
+    let name = "Mariia Coin"
+    let symbol = "MRSNLK"
+    let totalSupply = 1000000000
+
     beforeEach(async () => {
         [creater, minter, buyer, auctionOwner, bidder1, bidder2, ...otherAccounts] = await ethers.getSigners();
 
+        const Token = await ethers.getContractFactory('Token');
+        token = await Token.deploy(name, symbol, totalSupply);
+        tokenAddress = token.address;
+
         const Market = await ethers.getContractFactory('KPMarket');
-        market = await Market.deploy();
+        market = await Market.deploy(tokenAddress);
         marketAddress = market.address;
 
         const NFT = await ethers.getContractFactory('NFT');
@@ -83,7 +91,7 @@ describe("AuctionFactory", () => {
                     .to.be.revertedWith("Auction: the bidder cannot be the auction creator");
             });
 
-            it('Should reverted if the bidder is the auction creator', async () => {
+            it('Should reverted if the auction is not opened', async () => {
                 await auctionInstance.connect(auctionOwner).cancelAuction();
                 await expect(auctionInstance.connect(bidder1).placeBid(
                     { value: ethers.utils.parseUnits('0.02', 'ether') }

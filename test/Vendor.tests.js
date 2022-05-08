@@ -11,8 +11,8 @@ describe("Vendor", () => {
     let Vendor;
     let vendorContract;
 
-    let name = "Staking Token"
-    let symbol = "STTK"
+    let name = "Mariia Coin"
+    let symbol = "MRSNLK"
     let totalSupply = 1000000000
 
     beforeEach(async () => {

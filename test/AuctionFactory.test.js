@@ -8,6 +8,7 @@ describe("AuctionFactory", () => {
 
     let nft;
     let market;
+    let token;
     let auction1;
     let auction2;
     let auctionFactory;
@@ -17,6 +18,7 @@ describe("AuctionFactory", () => {
     let auctionAddress1;
     let auctionAddress2;
     let auctionFactoryAddress;
+    let tokenAddress;
 
     let listingPrice;
     let duration;
@@ -26,11 +28,19 @@ describe("AuctionFactory", () => {
     let nftAddress;
     let tokenId;
 
+    let name = "Mariia Coin"
+    let symbol = "MRSNLK"
+    let totalSupply = 1000000000
+
     beforeEach(async () => {
         [creater, minter, buyer, auctionOwner, bidder1, bidder2, bidder3, ...otherAccounts] = await ethers.getSigners();
 
+        const Token = await ethers.getContractFactory('Token');
+        token = await Token.deploy(name, symbol, totalSupply);
+        tokenAddress = token.address;
+
         const Market = await ethers.getContractFactory('KPMarket');
-        market = await Market.deploy();
+        market = await Market.deploy(tokenAddress);
         marketAddress = market.address;
 
         const NFT = await ethers.getContractFactory('NFT');

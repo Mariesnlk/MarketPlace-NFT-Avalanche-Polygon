@@ -113,6 +113,13 @@ npm run build
 npm run start
 ```
 
+Price
+
+1 ETH = 50 MARIIA COIN
+
+The price in `MRSNLK` for the NFT will be calculated automatically. If the price in ETH in 0.0001 eth, the price in `MRSNLK` will be 0.005 MRSNLK.
+
+
 # UI Interface
 
 ![alt text](screenshots/1.png)

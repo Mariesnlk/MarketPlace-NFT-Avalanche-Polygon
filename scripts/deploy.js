@@ -14,7 +14,7 @@ async function main() {
     console.log("Vendor deployed to: ", vendor.address);
 
     const NFTMarket = await hre.ethers.getContractFactory("KPMarket");
-    const nftMarket = await NFTMarket.deploy();
+    const nftMarket = await NFTMarket.deploy(token.address);
     await nftMarket.deployed();
     console.log("NFT Market address: ", nftMarket.address);
 
@@ -23,7 +23,8 @@ async function main() {
     await nft.deployed();
     console.log("NFT address: ", nft.address);
 
-    await market.setNFTContract(nft.address);
+    await nftMarket.setNFTContract(nft.address);
+    await nftMarket.setTokensPrice(50);
 
     const AuctionFactory = await hre.ethers.getContractFactory("AuctionFactory");
     const auctionFactory = await AuctionFactory.deploy();
