@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./interfaces/IKPMarket.sol";
+import "./users/interfaces/IUserRegistration.sol";
 
 /// @title Market contract
 contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
@@ -20,6 +21,8 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
     IERC721 public nftContract;
     /// @notice Token contract
     IERC20 public token;
+    /// @notice UserRegistration contract to allowed only registered and login users to use some functions
+    IUserRegistration public usersRegistration;
     /// @notice price that permit add nft to the market
     uint256 public listingPrice = 0.045 ether;
     /// @notice tokenId return which MarketToken - fetch which one it is
@@ -29,9 +32,16 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
 
     //// TODO ERC2981: add implementation of the royalty standard, and the respective extensions for ERC721 and ERC1155
 
-    constructor(address _token) {
+    constructor(address _token, address _usersRegistration) {
         require(_token != address(0), "KPMarket: invalid token address");
         token = IERC20(_token);
+        require(_usersRegistration != address(0), "INVALID_ADDRESS");
+        usersRegistration = IUserRegistration(_usersRegistration);
+    }
+
+    modifier onlyLogin() {
+        require(usersRegistration.checkIsUserLogged(), "ONLY_LOGIN_USER");
+        _;
     }
 
     /**
@@ -134,6 +144,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
         external
         payable
         override
+        onlyLogin
         returns (bool)
     {
         require(
@@ -167,6 +178,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
         payable
         override
         nonReentrant
+        onlyLogin
         returns (bool)
     {
         uint256 price = idToMarketToken[nftId].price;
@@ -208,6 +220,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
         external
         view
         override
+        onlyLogin
         returns (MarketNFT[] memory)
     {
         uint256 nftCount = tokenIds.current();
@@ -233,7 +246,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
      * @notice get info list of NFT that owns msg.sender
      * @dev fetchMyNFTs
      */
-    function getMyNFTs() external view override returns (MarketNFT[] memory) {
+    function getMyNFTs() external view override onlyLogin returns (MarketNFT[] memory) {
         uint256 totalNFTCount = tokenIds.current();
         //counter for each individual user
         uint256 itemCount = 0;
@@ -267,6 +280,7 @@ contract KPMarket is IKPMarket, ReentrancyGuard, Ownable {
         external
         view
         override
+        onlyLogin
         returns (MarketNFT[] memory)
     {
         uint256 totalNFTCount = tokenIds.current();

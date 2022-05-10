@@ -5,14 +5,14 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IUserRegistration.sol";
 
-contract UserRegistratuin is IUserRegistratuin, Ownable {
+contract UserRegistratuin is IUserRegistration, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private usersIds;
     /// @notice address of the wallet => struct of user`s info
     mapping(address => UserDetail) private users;
 
     // TODO delete account
-    // TODO update user`s info
+    // TODO update user`s info do this with IPFS
     // TODO get all users
 
     /**
@@ -99,7 +99,7 @@ contract UserRegistratuin is IUserRegistratuin, Ownable {
      */
     function getAllUsers()
         external
-        view
+        pure
         override
         returns (address[] memory _users)
     {}

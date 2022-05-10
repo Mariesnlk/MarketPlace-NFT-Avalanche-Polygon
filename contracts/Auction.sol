@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./interfaces/IAuction.sol";
+import "./users/interfaces/IUserRegistration.sol";
 
 /// @title Auction contract
 contract Auction is IAuction, ReentrancyGuard {
@@ -33,6 +34,8 @@ contract Auction is IAuction, ReentrancyGuard {
     IERC721 public nft;
     /// @notice array of the bids made by the bidders
     Bid[] public bids;
+    /// @notice UserRegistration contract to allowed only registered and login users to use some functions
+    IUserRegistration public usersRegistration;
 
     constructor(
         address _creator,
@@ -76,10 +79,20 @@ contract Auction is IAuction, ReentrancyGuard {
         maxBidder = _creator;
     }
 
+    modifier onlyLogin() {
+        require(usersRegistration.checkIsUserLogged(), "ONLY_LOGIN_USER");
+        _;
+    }
+
+    function setRegistrationContract(address _usersRegistration) external {
+        require(_usersRegistration != address(0), "INVALID_ADDRESS");
+        usersRegistration = IUserRegistration(_usersRegistration);
+    }
+
     /**
      * @notice Place a bid on the auction
      **/
-    function placeBid() external payable override nonReentrant returns (bool) {
+    function placeBid() external payable override nonReentrant onlyLogin returns (bool) {
         require(
             msg.sender != creator,
             "Auction: the bidder cannot be the auction creator"
@@ -124,7 +137,7 @@ contract Auction is IAuction, ReentrancyGuard {
     /**
      * @notice Withdraw the token after the auction is over
      **/
-    function withdrawToken() external override {
+    function withdrawToken() external override onlyLogin {
         require(
             getAuctionState() == AuctionState.ENDED ||
                 getAuctionState() == AuctionState.DIRECT_BUY,
@@ -143,7 +156,7 @@ contract Auction is IAuction, ReentrancyGuard {
     /**
      * @notice Withdraw the funds after the auction is over
      **/
-    function withdrawFunds() external override nonReentrant {
+    function withdrawFunds() external override nonReentrant onlyLogin {
         require(
             getAuctionState() == AuctionState.ENDED ||
                 getAuctionState() == AuctionState.DIRECT_BUY,
@@ -163,7 +176,7 @@ contract Auction is IAuction, ReentrancyGuard {
     /**
      * @notice Cancel the auction
      **/
-    function cancelAuction() external override returns (bool) {
+    function cancelAuction() external override onlyLogin returns (bool) {
         require(
             msg.sender == creator,
             "Auction: only the auction creator can cancel the auction"
@@ -194,6 +207,7 @@ contract Auction is IAuction, ReentrancyGuard {
         external
         view
         override
+        onlyLogin
         returns (address[] memory, uint256[] memory)
     {
         address[] memory addressesOfBidders = new address[](bids.length);
@@ -208,7 +222,7 @@ contract Auction is IAuction, ReentrancyGuard {
     /**
      * @notice Get the auction state
      **/
-    function getAuctionState() public view override returns (AuctionState) {
+    function getAuctionState() public view override onlyLogin  returns (AuctionState) {
         if (isCancelled) {
             return AuctionState.CANCELLED;
         } else if (isDirectBuy) {

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 /// @title Define interface for UserRegistration contract
-interface IUserRegistratuin {
+interface IUserRegistration {
     /**
      * @dev struct of user info
      * @param id user`s id
