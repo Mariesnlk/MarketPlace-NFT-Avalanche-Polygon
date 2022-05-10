@@ -13,8 +13,13 @@ async function main() {
     await vendor.deployed();
     console.log("Vendor deployed to: ", vendor.address);
 
+    const UserRegistratoin = await hre.ethers.getContractFactory("UserRegistratoin");
+    const userRegistration = await UserRegistratoin.deploy();
+    await userRegistration.deployed();
+    console.log("UserRegistration address: ", userRegistration.address);
+
     const NFTMarket = await hre.ethers.getContractFactory("KPMarket");
-    const nftMarket = await NFTMarket.deploy(token.address);
+    const nftMarket = await NFTMarket.deploy(token.address, userRegistration.address);
     await nftMarket.deployed();
     console.log("NFT Market address: ", nftMarket.address);
 
@@ -27,7 +32,7 @@ async function main() {
     await nftMarket.setTokensPrice(50);
 
     const AuctionFactory = await hre.ethers.getContractFactory("AuctionFactory");
-    const auctionFactory = await AuctionFactory.deploy();
+    const auctionFactory = await AuctionFactory.deploy(userRegistration.address);
     await auctionFactory.deployed();
     console.log("Auction Factory address:", auctionFactory.address);
 
@@ -36,7 +41,8 @@ async function main() {
     export const vendoraddress = ${vendor.address}
     export const nftmarketaddress = ${nftMarket.address}
     export const nftaddress = ${nft.address}
-    export const auctionfactoryaddress = ${auctionFactory.address}`
+    export const auctionfactoryaddress = ${auctionFactory.address}
+    export const userregistrationaddress = ${userRegistration.address}`
 
     let data = JSON.stringify(config)
     fs.writeFileSync('config.js', JSON.parse(data))

@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IUserRegistration.sol";
 
-contract UserRegistratuin is IUserRegistration, Ownable {
+contract UserRegistratoin is IUserRegistration, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private usersIds;
     /// @notice address of the wallet => struct of user`s info
