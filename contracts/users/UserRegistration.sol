@@ -9,7 +9,7 @@ contract UserRegistratoin is IUserRegistration, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private usersIds;
     /// @notice address of the wallet => struct of user`s info
-    mapping(address => UserDetail) private users;
+    mapping(address => UserDetail) public users;
 
     // TODO delete account
     // TODO update user`s info do this with IPFS
@@ -27,9 +27,11 @@ contract UserRegistratoin is IUserRegistration, Ownable {
         string memory _password,
         string memory _bio
     ) external override returns (bool) {
+        require(msg.sender != address(0), "ZERO_ADDRESS");
         require(
-            msg.sender != address(0),
-            "Registration: user address cannot be 0"
+            keccak256(abi.encodePacked(users[msg.sender].username)) !=
+                keccak256(abi.encodePacked(_username)),
+            "ALREADY_REGISTERED"
         );
 
         usersIds.increment();
@@ -61,10 +63,9 @@ contract UserRegistratoin is IUserRegistration, Ownable {
                 keccak256(abi.encodePacked(_password)))
         ) {
             users[msg.sender].isUserLoggedIn = true;
-            return users[msg.sender].isUserLoggedIn;
-        } else {
-            return false;
         }
+
+        return users[msg.sender].isUserLoggedIn;
     }
 
     /**
@@ -91,6 +92,7 @@ contract UserRegistratoin is IUserRegistration, Ownable {
         override
         returns (string memory, string memory)
     {
+        require(users[msg.sender].isUserLoggedIn, "NOT_LOGIN");
         return (users[msg.sender].username, users[msg.sender].bio);
     }
 
