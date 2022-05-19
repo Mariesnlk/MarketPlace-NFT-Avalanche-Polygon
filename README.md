@@ -15,6 +15,23 @@ NFT Marketplace (for minting, buying and selling NFTs live with IPFS data hostin
 
 ---
 
+## TODO
+&#9744; implement Airdrop for every week promotion for paricipants with Chainlink
+
+&#9744; implement secondary royalties 
+
+&#9744; implement ability to create collections
+
+&#9744; implement likes|dislikes for tokens|collections
+
+&#9744; save more info about NFTs
+
+&#9744; fix registration and login
+
+&#9744; add frontend
+
+---
+
 ## Developer tools
 - Solidity - an object-oriented, high-level language for implementing smart contracts
 - OpenZeppelin - a library for secure smart contract development
@@ -32,6 +49,8 @@ by making the web upgradeable, resilient, and more open
 ----
 
 ## High level diagram
+
+![alt text](screenshots/high-level-diagram.png)
 
 ## Use cases & Usage Scenarios
 
