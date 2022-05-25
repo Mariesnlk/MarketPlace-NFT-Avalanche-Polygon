@@ -4,10 +4,10 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./interfaces/IAuction.sol";
-import "./users/interfaces/IUserRegistration.sol";
+import "./users/UserRegistration.sol";
 
 /// @title Auction contract
-contract Auction is IAuction, ReentrancyGuard {
+contract Auction is IAuction, UserRegistration, ReentrancyGuard {
     /// @notice the block timestamp which marks the start of the auction
     uint256 public startTime;
     /// @notice the block timestamp which marks the end of the auction (in seconds)
@@ -92,7 +92,7 @@ contract Auction is IAuction, ReentrancyGuard {
     /**
      * @notice Place a bid on the auction
      **/
-    function placeBid() external payable override nonReentrant onlyLogin returns (bool) {
+    function placeBid() external payable override nonReentrant returns (bool) {
         require(
             msg.sender != creator,
             "Auction: the bidder cannot be the auction creator"
@@ -137,7 +137,7 @@ contract Auction is IAuction, ReentrancyGuard {
     /**
      * @notice Withdraw the token after the auction is over
      **/
-    function withdrawToken() external override onlyLogin {
+    function withdrawToken() external override {
         require(
             getAuctionState() == AuctionState.ENDED ||
                 getAuctionState() == AuctionState.DIRECT_BUY,
@@ -176,7 +176,7 @@ contract Auction is IAuction, ReentrancyGuard {
     /**
      * @notice Cancel the auction
      **/
-    function cancelAuction() external override onlyLogin returns (bool) {
+    function cancelAuction() external override returns (bool) {
         require(
             msg.sender == creator,
             "Auction: only the auction creator can cancel the auction"
@@ -207,7 +207,6 @@ contract Auction is IAuction, ReentrancyGuard {
         external
         view
         override
-        onlyLogin
         returns (address[] memory, uint256[] memory)
     {
         address[] memory addressesOfBidders = new address[](bids.length);
@@ -222,7 +221,7 @@ contract Auction is IAuction, ReentrancyGuard {
     /**
      * @notice Get the auction state
      **/
-    function getAuctionState() public view override onlyLogin  returns (AuctionState) {
+    function getAuctionState() public view override returns (AuctionState) {
         if (isCancelled) {
             return AuctionState.CANCELLED;
         } else if (isDirectBuy) {
