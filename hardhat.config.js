@@ -37,8 +37,10 @@ module.exports = {
     },
   },
   gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
+    enabled: true,
     currency: "USD",
+    gasPrice: 74,
+    coinmarketcap: process.env.COINT_MARKET_CAP_API
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,

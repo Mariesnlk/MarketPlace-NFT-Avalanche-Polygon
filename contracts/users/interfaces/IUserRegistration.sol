@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 /// @title Define interface for UserRegistration contract
 interface IUserRegistration {
     /**
-     * @dev struct of user info
+     * @notice struct of user info
      * @param id user`s id
      * @param username nickname to login
      * @param password password to login
@@ -20,7 +20,7 @@ interface IUserRegistration {
     }
 
     /**
-     * @dev emmited wthen new user is registered
+     * @notice emmited wthen new user is registered
      * @param id user`s id
      * @param username user`s nickname
      * @param wallet user`s wallet address
@@ -28,7 +28,7 @@ interface IUserRegistration {
     event Registered(uint256 id, string username, address indexed wallet);
 
     /**
-     * @dev allows user to register in dapp to get access to merket
+     * @notice allows user to register in dapp to get access to merket
      * @param _username nickname to login
      * @param _password password to login
      * @param _bio some more info about user (optional)
@@ -41,7 +41,7 @@ interface IUserRegistration {
     ) external returns (bool);
 
     /**
-     * @dev allows registered user log in dapp
+     * @notice allows registered user log in dapp
      * @param _username nickname to login
      * @param _password password to login
      **/
@@ -50,23 +50,23 @@ interface IUserRegistration {
         returns (bool);
 
     /**
-     * @dev checking if the user is logged in or not
+     * @notice checking if the user is logged in or not
      */
     function checkIsUserLogged() external view returns (bool);
-
+    
     /**
-     * @dev logout from dapp, all pages are invalid
+     * @notice logout from dapp, all pages are invalid
      */
     function logout() external;
 
     /**
-     * @dev get user username and bio
-     * @notice this info will be display in the personal page
+     * @notice get user username and bio
+     * @dev this info will be display in the personal page
      */
     function getUser() external view returns (string memory, string memory);
 
     /**
-     * @dev get a list of all registered users
+     * @notice get a list of all registered users
      */
     function getAllUsers() external view returns (address[] memory _users);
 }

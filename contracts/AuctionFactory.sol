@@ -7,10 +7,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IAuctionFactory.sol";
 import "./interfaces/IAuction.sol";
 import "./Auction.sol";
-import "./users/interfaces/IUserRegistration.sol";
+import "./users/UserRegistration.sol";
 
 /// @title AuctionFactory contract
-contract AuctionFactory is IAuctionFactory, Ownable {
+contract AuctionFactory is IAuctionFactory, UserRegistration {
     using Counters for Counters.Counter;
     Counters.Counter private auctionIds;
     /// @notice UserRegistration contract to allowed only registered and login users to use some functions
@@ -21,16 +21,6 @@ contract AuctionFactory is IAuctionFactory, Ownable {
     mapping(uint256 => Auction) public auctions;
     /// @notice auction id => AuctionInfo (address, bool)
     mapping(uint256 => AuctionInfo) public auctionsInfo;
-
-    constructor(address _usersRegistration) {
-        require(_usersRegistration != address(0), "INVALID_ADDRESS");
-        usersRegistration = IUserRegistration(_usersRegistration);
-    }
-
-    modifier onlyLogin() {
-        require(usersRegistration.checkIsUserLogged(), "ONLY_LOGIN_USER");
-        _;
-    }
 
     /**
      * @notice set new minumum value of the auction duration
@@ -61,7 +51,7 @@ contract AuctionFactory is IAuctionFactory, Ownable {
         uint256 _startPrice,
         address _nftAddress,
         uint256 _tokenId
-    ) external override onlyLogin returns (bool) {
+    ) external override returns (bool) {
         require(
             _duration >= minAuctionDuration,
             "Auction: invalid auction duration"
@@ -103,7 +93,7 @@ contract AuctionFactory is IAuctionFactory, Ownable {
      * @dev only owner of the auction can delete
      * @param auctionId address of the auction that will be deleted
      **/
-    function deleteAuction(uint256 auctionId) external override onlyLogin returns (bool) {
+    function deleteAuction(uint256 auctionId) external override returns (bool) {
         require(auctionsInfo[auctionId].isExists, "ALREADY_DELETED");
 
         address auctionAddress = auctionsInfo[auctionId].auction;
@@ -129,7 +119,6 @@ contract AuctionFactory is IAuctionFactory, Ownable {
         external
         view
         override
-        onlyLogin
         returns (address[] memory _auctions)
     {
         uint256 getAuctionsIds = auctionIds.current();
@@ -147,7 +136,6 @@ contract AuctionFactory is IAuctionFactory, Ownable {
         external
         view
         override
-        onlyLogin
         returns (
             uint256[] memory directBuy,
             address[] memory holder,

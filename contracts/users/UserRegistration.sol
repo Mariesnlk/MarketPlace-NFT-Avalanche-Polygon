@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IUserRegistration.sol";
 
-contract UserRegistratoin is IUserRegistration, Ownable {
+contract UserRegistration is IUserRegistration, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private usersIds;
     /// @notice address of the wallet => struct of user`s info
@@ -15,12 +15,17 @@ contract UserRegistratoin is IUserRegistration, Ownable {
     // TODO update user`s info do this with IPFS
     // TODO get all users
 
+    modifier onlyLogged(address user) {
+        require(issUserLogged(user), "ONLY_LOGIN_USER");
+        _;
+    }
+
     /**
-     * @dev allows user to register in dapp to get access to merket
+     * @notice allows user to register in dapp to get access to merket
      * @param _username nickname to login
      * @param _password password to login
      * @param _bio some more info about user (optional)
-     * @notice valigation of username and password in FE, bio field can be empty
+     * @dev valigation of username and password in FE, bio field can be empty
      **/
     function register(
         string memory _username,
@@ -47,7 +52,7 @@ contract UserRegistratoin is IUserRegistration, Ownable {
     }
 
     /**
-     * @dev allows registered user log in dapp
+     * @notice allows registered user log in dapp
      * @param _username nickname to login
      * @param _password password to login
      **/
@@ -69,22 +74,22 @@ contract UserRegistratoin is IUserRegistration, Ownable {
     }
 
     /**
-     * @dev checking if the user is logged in or not
+     * @notice checking if the user is logged in or not
      */
     function checkIsUserLogged() external view override returns (bool) {
         return users[msg.sender].isUserLoggedIn;
     }
 
     /**
-     * @dev logout from dapp, all pages are invalid
+     * @notice logout from dapp, all pages are invalid
      */
     function logout() external override {
         users[msg.sender].isUserLoggedIn = false;
     }
 
     /**
-     * @dev get user username and bio
-     * @notice this info will be display in the personal page
+     * @notice get user username and bio
+     * @dev this info will be display in the personal page
      */
     function getUser()
         external
@@ -97,7 +102,7 @@ contract UserRegistratoin is IUserRegistration, Ownable {
     }
 
     /**
-     * @dev get a list of all registered users
+     * @notice get a list of all registered users
      */
     function getAllUsers()
         external
@@ -105,4 +110,16 @@ contract UserRegistratoin is IUserRegistration, Ownable {
         override
         returns (address[] memory _users)
     {}
+
+    /**
+     * @notice checking if the user is logged in or not
+     * @param user user address to check
+     */
+    function issUserLogged(address user)
+        private
+        view
+        returns (bool)
+    {
+        return users[user].isUserLoggedIn;
+    }
 }
