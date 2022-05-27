@@ -26,6 +26,8 @@ NFT Marketplace (for minting, buying and selling NFTs live with IPFS data hostin
 
 &#9744; save more info about NFTs
 
+&#9744; add dynamic NFTs
+
 &#9744; fix registration and login
 
 &#9744; add frontend
